@@ -1029,7 +1029,6 @@ pub fn to_rust_ty<T: AsRef<str>>(ty: T) -> Cow<'static, str> {
         "EGLAttrib" => "types::EGLAttrib",
         "EGLAttrib *" => "*mut types::EGLAttrib",
         "const EGLAttrib *" => "*const types::EGLAttrib",
-        "const EGLattrib *" => "*const types::EGLAttrib", // Due to a typo in khronos_api/api_angle/scripts/egl_angle_ext.xml - see brendanzab/gl-rs#491
         "EGLConfig" => "types::EGLConfig",
         "EGLConfig *" => "*mut types::EGLConfig",
         "EGLContext" => "types::EGLContext",
@@ -1085,6 +1084,8 @@ pub fn to_rust_ty<T: AsRef<str>>(ty: T) -> Cow<'static, str> {
         "EGLnsecsANDROID" => "types::EGLnsecsANDROID",
         "EGLnsecsANDROID *" => "*mut types::EGLnsecsANDROID",
         "EGLBoolean *" => "*mut types::EGLBoolean",
+
+        "EGLFrameTokenANGLE" => "types::khronos_uint64_t",
 
         // failure
         _ => panic!("Type conversion not implemented for `{}`", ty.as_ref()),
