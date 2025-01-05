@@ -29,7 +29,8 @@ fn main() {
     // The absolute path is needed, because we don't know where the output
     // directory will be, and `include_bytes!(..)` resolves paths relative to the
     // containing file.
-    let root = env::current_dir().unwrap().join("api_webgl/extensions");
+    let cargo_manifest_dir = PathBuf::from(std::env::var_os("CARGO_MANIFEST_DIR").unwrap());
+    let root = cargo_manifest_dir.join("api_webgl/extensions");
 
     // Generate a slice literal, looking like this:
     // `&[&*include_bytes!(..), &*include_bytes!(..), ..]`
@@ -53,7 +54,7 @@ fn main() {
             let ext_path = path.join("extension.xml");
             if ext_path.is_file() {
                 // Include the XML file, making sure to use an absolute path.
-                writeln!(file, "&*include_bytes!({:?}),", ext_path.to_str().unwrap()).unwrap();
+                writeln!(file, "&*include_bytes!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/\", {:?})),", ext_path.strip_prefix(cargo_manifest_dir.clone()).unwrap().to_str().unwrap()).unwrap();
             }
         }
     }
