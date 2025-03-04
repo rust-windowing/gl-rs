@@ -70,6 +70,7 @@
 //! ~~~
 //!
 
+#![no_std]
 #![crate_name = "gl"]
 #![crate_type = "lib"]
 

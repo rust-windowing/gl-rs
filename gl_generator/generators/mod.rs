@@ -16,6 +16,22 @@ use registry::{Cmd, Enum, Registry};
 use std::io;
 use Api;
 
+pub const SYMBOL_NAME_TYPE: &'static str = {
+    #[cfg(not(feature = "cstr_symbols"))]
+    { "str" }
+    #[cfg(feature = "cstr_symbols")]
+    { "core::ffi::CStr" } // NOTE: Im using core::ffi instead of __gl_imports::ffi here on purpose
+                          // there are some files that use this module that don't have the __gl_imports module imported
+                          // and I don't want two variations of the same thing (so we are using the complete core::ffi path)
+};
+
+pub const SYMBOL_NAME_PREFIX: &'static str = {
+    #[cfg(not(feature = "cstr_symbols"))]
+    { "" }
+    #[cfg(feature = "cstr_symbols")]
+    { "c" } // https://doc.rust-lang.org/edition-guide/rust-2021/c-string-literals.html
+};
+
 pub mod debug_struct_gen;
 pub mod global_gen;
 pub mod static_gen;

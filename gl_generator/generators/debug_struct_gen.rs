@@ -44,9 +44,9 @@ where
         dest,
         r#"
         mod __gl_imports {{
-            pub use std::mem;
-            pub use std::marker::Send;
-            pub use std::os::raw;
+            pub use core::mem;
+            pub use core::marker::Send;
+            pub use core::ffi;
         }}
     "#
     )
@@ -96,17 +96,17 @@ where
         #[derive(Clone)]
         pub struct FnPtr {{
             /// The function pointer that will be used when calling the function.
-            f: *const __gl_imports::raw::c_void,
+            f: *const __gl_imports::ffi::c_void,
             /// True if the pointer points to a real function, false if points to a `panic!` fn.
             is_loaded: bool,
         }}
 
         impl FnPtr {{
             /// Creates a `FnPtr` from a load attempt.
-            fn new(ptr: *const __gl_imports::raw::c_void) -> FnPtr {{
+            fn new(ptr: *const __gl_imports::ffi::c_void) -> FnPtr {{
                 if ptr.is_null() {{
                     FnPtr {{
-                        f: missing_fn_panic as *const __gl_imports::raw::c_void,
+                        f: missing_fn_panic as *const __gl_imports::ffi::c_void,
                         is_loaded: false
                     }}
                 }} else {{
@@ -185,12 +185,12 @@ where
             /// let gl = Gl::load_with(|s| glfw.get_proc_address(s));
             /// ~~~
             #[allow(dead_code, unused_variables)]
-            pub fn load_with<F>(mut loadfn: F) -> {api} where F: FnMut(&'static str) -> *const __gl_imports::raw::c_void {{
+            pub fn load_with<F>(mut loadfn: F) -> {api} where F: FnMut(&'static {s_type}) -> *const __gl_imports::ffi::c_void {{
                 #[inline(never)]
-                fn do_metaloadfn(loadfn: &mut dyn FnMut(&'static str) -> *const __gl_imports::raw::c_void,
-                                 symbol: &'static str,
-                                 symbols: &[&'static str])
-                                 -> *const __gl_imports::raw::c_void {{
+                fn do_metaloadfn(loadfn: &mut dyn FnMut(&'static {s_type}) -> *const __gl_imports::ffi::c_void,
+                                 symbol: &'static {s_type},
+                                 symbols: &[&'static {s_type}])
+                                 -> *const __gl_imports::ffi::c_void {{
                     let mut ptr = loadfn(symbol);
                     if ptr.is_null() {{
                         for &sym in symbols {{
@@ -200,22 +200,24 @@ where
                     }}
                     ptr
                 }}
-                let mut metaloadfn = |symbol: &'static str, symbols: &[&'static str]| {{
+                let mut metaloadfn = |symbol: &'static {s_type}, symbols: &[&'static {s_type}]| {{
                     do_metaloadfn(&mut loadfn, symbol, symbols)
                 }};
                 {api} {{",
+                  s_type = super::SYMBOL_NAME_TYPE,
                   api = super::gen_struct_name(registry.api))?;
 
     for cmd in &registry.cmds {
         writeln!(
             dest,
-            "{name}: FnPtr::new(metaloadfn(\"{symbol}\", &[{fallbacks}])),",
+            "{name}: FnPtr::new(metaloadfn({s_prefix}\"{symbol}\", &[{fallbacks}])),",
             name = cmd.proto.ident,
+            s_prefix = super::SYMBOL_NAME_PREFIX,
             symbol = super::gen_symbol_name(registry.api, &cmd.proto.ident),
             fallbacks = match registry.aliases.get(&cmd.proto.ident) {
                 Some(fbs) => fbs
                     .iter()
-                    .map(|name| format!("\"{}\"", super::gen_symbol_name(registry.api, &name)))
+                    .map(|name| format!("{}\"{}\"", super::SYMBOL_NAME_PREFIX, super::gen_symbol_name(registry.api, &name)))
                     .collect::<Vec<_>>()
                     .join(", "),
                 None => format!(""),

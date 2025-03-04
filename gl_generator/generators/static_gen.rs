@@ -41,8 +41,8 @@ where
         dest,
         r#"
         mod __gl_imports {{
-            pub use std::mem;
-            pub use std::os::raw;
+            pub use core::mem;
+            pub use core::ffi;
         }}
     "#
     )

@@ -1,31 +1,31 @@
 // Common types from OpenGL 1.1
-pub type GLenum = super::__gl_imports::raw::c_uint;
-pub type GLboolean = super::__gl_imports::raw::c_uchar;
-pub type GLbitfield = super::__gl_imports::raw::c_uint;
-pub type GLvoid = super::__gl_imports::raw::c_void;
-pub type GLbyte = super::__gl_imports::raw::c_char;
-pub type GLshort = super::__gl_imports::raw::c_short;
-pub type GLint = super::__gl_imports::raw::c_int;
-pub type GLclampx = super::__gl_imports::raw::c_int;
-pub type GLubyte = super::__gl_imports::raw::c_uchar;
-pub type GLushort = super::__gl_imports::raw::c_ushort;
-pub type GLuint = super::__gl_imports::raw::c_uint;
-pub type GLsizei = super::__gl_imports::raw::c_int;
-pub type GLfloat = super::__gl_imports::raw::c_float;
-pub type GLclampf = super::__gl_imports::raw::c_float;
-pub type GLdouble = super::__gl_imports::raw::c_double;
-pub type GLclampd = super::__gl_imports::raw::c_double;
-pub type GLeglImageOES = *const super::__gl_imports::raw::c_void;
-pub type GLchar = super::__gl_imports::raw::c_char;
-pub type GLcharARB = super::__gl_imports::raw::c_char;
+pub type GLenum = super::__gl_imports::ffi::c_uint;
+pub type GLboolean = super::__gl_imports::ffi::c_uchar;
+pub type GLbitfield = super::__gl_imports::ffi::c_uint;
+pub type GLvoid = super::__gl_imports::ffi::c_void;
+pub type GLbyte = super::__gl_imports::ffi::c_char;
+pub type GLshort = super::__gl_imports::ffi::c_short;
+pub type GLint = super::__gl_imports::ffi::c_int;
+pub type GLclampx = super::__gl_imports::ffi::c_int;
+pub type GLubyte = super::__gl_imports::ffi::c_uchar;
+pub type GLushort = super::__gl_imports::ffi::c_ushort;
+pub type GLuint = super::__gl_imports::ffi::c_uint;
+pub type GLsizei = super::__gl_imports::ffi::c_int;
+pub type GLfloat = super::__gl_imports::ffi::c_float;
+pub type GLclampf = super::__gl_imports::ffi::c_float;
+pub type GLdouble = super::__gl_imports::ffi::c_double;
+pub type GLclampd = super::__gl_imports::ffi::c_double;
+pub type GLeglImageOES = *const super::__gl_imports::ffi::c_void;
+pub type GLchar = super::__gl_imports::ffi::c_char;
+pub type GLcharARB = super::__gl_imports::ffi::c_char;
 
 #[cfg(target_os = "macos")]
-pub type GLhandleARB = *const super::__gl_imports::raw::c_void;
+pub type GLhandleARB = *const super::__gl_imports::ffi::c_void;
 #[cfg(not(target_os = "macos"))]
-pub type GLhandleARB = super::__gl_imports::raw::c_uint;
+pub type GLhandleARB = super::__gl_imports::ffi::c_uint;
 
-pub type GLhalfARB = super::__gl_imports::raw::c_ushort;
-pub type GLhalf = super::__gl_imports::raw::c_ushort;
+pub type GLhalfARB = super::__gl_imports::ffi::c_ushort;
+pub type GLhalf = super::__gl_imports::ffi::c_ushort;
 
 // Must be 32 bits
 pub type GLfixed = GLint;
@@ -52,21 +52,21 @@ pub type GLDEBUGPROC = Option<extern "system" fn(source: GLenum,
                                                  severity: GLenum,
                                                  length: GLsizei,
                                                  message: *const GLchar,
-                                                 userParam: *mut super::__gl_imports::raw::c_void)>;
+                                                 userParam: *mut super::__gl_imports::ffi::c_void)>;
 pub type GLDEBUGPROCARB = Option<extern "system" fn(source: GLenum,
                                                     gltype: GLenum,
                                                     id: GLuint,
                                                     severity: GLenum,
                                                     length: GLsizei,
                                                     message: *const GLchar,
-                                                    userParam: *mut super::__gl_imports::raw::c_void)>;
+                                                    userParam: *mut super::__gl_imports::ffi::c_void)>;
 pub type GLDEBUGPROCKHR = Option<extern "system" fn(source: GLenum,
                                                     gltype: GLenum,
                                                     id: GLuint,
                                                     severity: GLenum,
                                                     length: GLsizei,
                                                     message: *const GLchar,
-                                                    userParam: *mut super::__gl_imports::raw::c_void)>;
+                                                    userParam: *mut super::__gl_imports::ffi::c_void)>;
 
 // GLES 1 types
 // "pub type GLclampx = i32;",
@@ -103,6 +103,6 @@ pub type GLDEBUGPROCAMD = Option<extern "system" fn(id: GLuint,
                                                     severity: GLenum,
                                                     length: GLsizei,
                                                     message: *const GLchar,
-                                                    userParam: *mut super::__gl_imports::raw::c_void)>;
-pub type GLhalfNV = super::__gl_imports::raw::c_ushort;
+                                                    userParam: *mut super::__gl_imports::ffi::c_void)>;
+pub type GLhalfNV = super::__gl_imports::ffi::c_ushort;
 pub type GLvdpauSurfaceNV = GLintptr;

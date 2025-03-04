@@ -21,6 +21,7 @@ path = "lib.rs"
 
 [features]
 unstable_generator_utils = []
+cstr_symbols = []
 
 [dependencies]
 khronos_api = { version = "3.2.0", path = "../khronos_api" }
