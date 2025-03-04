@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/crates/l/gl.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/crates/d/gl.svg)](https://crates.io/crates/gl)
 
-An OpenGL function pointer loader for the Rust Programming Language.
+An no_std OpenGL function pointer loader for the Rust Programming Language.
 
 ```toml
 [dependencies]
@@ -59,4 +59,29 @@ shouldn't be much overhead.
 if gl::Viewport::is_loaded() {
     // do something...
 }
+```
+
+## Symbol string types
+In previous versions, if you needed a null-terminated c-string from the `gl::load_with` function, you had to convert the &str to a CString. This limited the use of this library in `no_std` environments.
+
+In the latest release you can add the `"cstr_symbols"` feature to
+your `Cargo.toml` and the symbol name will now be a null-terminated `&CStr`, so you won't have to convert between them anymore.
+
+```rust
+// Quick example with sdl3-sys
+
+// Without the feature
+gl::load_with(| procname: &str | {
+    match CString::new(procname) { // Allocates and requires std
+        Ok(procname) => unsafe {
+           SDL_GL_GetProcAddress(procname.as_ptr()) as *const _
+        },
+        Err(_) => ptr::null(),
+    }
+});
+
+// With the feature
+gl::load_with(| procname: &CStr | {
+    unsafe { SDL_GL_GetProcAddress(procname.as_ptr()) as *const _ }
+});
 ```

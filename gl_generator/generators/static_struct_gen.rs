@@ -43,8 +43,8 @@ where
         dest,
         r#"
         mod __gl_imports {{
-            pub use std::mem;
-            pub use std::os::raw;
+            pub use core::mem;
+            pub use core::ffi;
         }}
     "#
     )
@@ -108,9 +108,10 @@ where
         "impl {api} {{
             /// Stub function.
             #[allow(dead_code)]
-            pub fn load_with<F>(mut _loadfn: F) -> {api} where F: FnMut(&'static str) -> *const __gl_imports::raw::c_void {{
+            pub fn load_with<F>(mut _loadfn: F) -> {api} where F: FnMut(&'static {s_type}) -> *const __gl_imports::ffi::c_void {{
                 {api}
             }}",
+        s_type = super::SYMBOL_NAME_TYPE,
         api = super::gen_struct_name(registry.api),
     )?;
 

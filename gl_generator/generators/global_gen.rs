@@ -47,8 +47,8 @@ where
         dest,
         r#"
         mod __gl_imports {{
-            pub use std::mem;
-            pub use std::os::raw;
+            pub use core::mem;
+            pub use core::ffi;
         }}
     "#
     )
@@ -63,9 +63,9 @@ where
         dest,
         r#"
         #[inline(never)]
-        fn metaloadfn(loadfn: &mut dyn FnMut(&'static str) -> *const __gl_imports::raw::c_void,
-                      symbol: &'static str,
-                      fallbacks: &[&'static str]) -> *const __gl_imports::raw::c_void {{
+        fn metaloadfn(loadfn: &mut dyn FnMut(&'static {s_type}) -> *const __gl_imports::ffi::c_void,
+                      symbol: &'static {s_type},
+                      fallbacks: &[&'static {s_type}]) -> *const __gl_imports::ffi::c_void {{
             let mut ptr = loadfn(symbol);
             if ptr.is_null() {{
                 for &sym in fallbacks {{
@@ -75,8 +75,7 @@ where
             }}
             ptr
         }}
-    "#
-    )
+    "#, s_type = super::SYMBOL_NAME_TYPE)
 }
 
 /// Creates a `types` module which contains all the type aliases.
@@ -156,16 +155,16 @@ where
         #[allow(missing_copy_implementations)]
         pub struct FnPtr {{
             /// The function pointer that will be used when calling the function.
-            f: *const __gl_imports::raw::c_void,
+            f: *const __gl_imports::ffi::c_void,
             /// True if the pointer points to a real function, false if points to a `panic!` fn.
             is_loaded: bool,
         }}
 
         impl FnPtr {{
             /// Creates a `FnPtr` from a load attempt.
-            pub fn new(ptr: *const __gl_imports::raw::c_void) -> FnPtr {{
+            pub fn new(ptr: *const __gl_imports::ffi::c_void) -> FnPtr {{
                 if ptr.is_null() {{
-                    FnPtr {{ f: missing_fn_panic as *const __gl_imports::raw::c_void, is_loaded: false }}
+                    FnPtr {{ f: missing_fn_panic as *const __gl_imports::ffi::c_void, is_loaded: false }}
                 }} else {{
                     FnPtr {{ f: ptr, is_loaded: true }}
                 }}
@@ -184,7 +183,7 @@ where
         "mod storage {{
             #![allow(non_snake_case)]
             #![allow(non_upper_case_globals)]
-            use super::__gl_imports::raw;
+            use super::__gl_imports::ffi;
             use super::FnPtr;"
     )?;
 
@@ -192,7 +191,7 @@ where
         writeln!(
             dest,
             "pub static mut {name}: FnPtr = FnPtr {{
-                f: super::missing_fn_panic as *const raw::c_void,
+                f: super::missing_fn_panic as *const ffi::c_void,
                 is_loaded: false
             }};",
             name = c.proto.ident
@@ -215,7 +214,7 @@ where
             Some(v) => {
                 let names = v
                     .iter()
-                    .map(|name| format!("\"{}\"", super::gen_symbol_name(registry.api, &name[..])))
+                    .map(|name| format!("{}\"{}\"", super::SYMBOL_NAME_PREFIX, super::gen_symbol_name(registry.api, &name[..])))
                     .collect::<Vec<_>>();
                 format!("&[{}]", names.join(", "))
             },
@@ -231,7 +230,7 @@ where
             #[allow(non_snake_case)]
             pub mod {fnname} {{
                 use super::{{storage, metaloadfn}};
-                use super::__gl_imports::raw;
+                use super::__gl_imports::ffi;
                 use super::FnPtr;
 
                 #[inline]
@@ -241,14 +240,16 @@ where
                 }}
 
                 #[allow(dead_code)]
-                pub fn load_with<F>(mut loadfn: F) where F: FnMut(&'static str) -> *const raw::c_void {{
+                pub fn load_with<F>(mut loadfn: F) where F: FnMut(&'static {s_type}) -> *const ffi::c_void {{
                     unsafe {{
-                        storage::{fnname} = FnPtr::new(metaloadfn(&mut loadfn, "{symbol}", {fallbacks}))
+                        storage::{fnname} = FnPtr::new(metaloadfn(&mut loadfn, {s_prefix}"{symbol}", {fallbacks}))
                     }}
                 }}
             }}
         "##,
             fnname = fnname,
+            s_type = super::SYMBOL_NAME_TYPE,
+            s_prefix = super::SYMBOL_NAME_PREFIX,
             fallbacks = fallbacks,
             symbol = symbol
         )?;
@@ -290,10 +291,11 @@ where
         /// gl::load_with(|s| glfw.get_proc_address(s));
         /// ~~~
         #[allow(dead_code)]
-        pub fn load_with<F>(mut loadfn: F) where F: FnMut(&'static str) -> *const __gl_imports::raw::c_void {{
+        pub fn load_with<F>(mut loadfn: F) where F: FnMut(&'static {s_type}) -> *const __gl_imports::ffi::c_void {{
             #[inline(never)]
-            fn inner(loadfn: &mut dyn FnMut(&'static str) -> *const __gl_imports::raw::c_void) {{
-    ")?;
+            fn inner(loadfn: &mut dyn FnMut(&'static {s_type}) -> *const __gl_imports::ffi::c_void) {{
+    ",
+    s_type = super::SYMBOL_NAME_TYPE)?;
 
     for c in &registry.cmds {
         writeln!(

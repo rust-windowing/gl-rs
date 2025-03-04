@@ -14,9 +14,9 @@ The following crates are contained in this repository:
 
 [![Version](https://img.shields.io/crates/v/gl.svg)](https://crates.io/crates/gl) [![License](https://img.shields.io/crates/l/gl.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/gl.svg)](https://crates.io/crates/gl)
 
-[README](https://github.com/brendanzab/gl-rs/tree/master/gl)
+[README](gl)
 
-An OpenGL function pointer loader for the Rust Programming Language.
+An no_std OpenGL function pointer loader for the Rust Programming Language.
 
 ```toml
 [dependencies]
@@ -27,9 +27,9 @@ gl = "0.14.0"
 
 [![Version](https://img.shields.io/crates/v/gl_generator.svg)](https://crates.io/crates/gl_generator) [![License](https://img.shields.io/crates/l/gl_generator.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/gl_generator.svg)](https://crates.io/crates/gl_generator)
 
-[README](https://github.com/brendanzab/gl-rs/tree/master/gl_generator)
+[README](gl_generator)
 
-Code generators for creating bindings to the Khronos OpenGL APIs.
+Code generators for creating no_std bindings to the Khronos OpenGL APIs.
 
 ```toml
 [build-dependencies]
@@ -40,7 +40,7 @@ gl_generator = "0.14.0"
 
 [![Version](https://img.shields.io/crates/v/khronos_api.svg)](https://crates.io/crates/khronos_api) [![License](https://img.shields.io/crates/l/khronos_api.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/khronos_api.svg)](https://crates.io/crates/khronos_api)
 
-[README](https://github.com/brendanzab/gl-rs/tree/master/khronos_api)
+[README](khronos_api)
 
 The Khronos XML API Registry, exposed as byte string constants.
 
@@ -61,7 +61,7 @@ git submodule update --init
 
 [![Version](https://img.shields.io/crates/v/webgl_generator.svg)](https://crates.io/crates/webgl_generator) [![License](https://img.shields.io/crates/l/webgl_generator.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/webgl_generator.svg)](https://crates.io/crates/webgl_generator)
 
-[README](https://github.com/brendanzab/gl-rs/tree/master/webgl_generator)
+[README](webgl_generator)
 
 Code generators for creating bindings to the WebGL APIs.
 
@@ -74,7 +74,7 @@ webgl_generator = "0.2.0"
 
 [![Version](https://img.shields.io/crates/v/webgl_stdweb.svg)](https://crates.io/crates/webgl_stdweb) [![License](https://img.shields.io/crates/l/webgl_stdweb.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/webgl_stdweb.svg)](https://crates.io/crates/webgl_stdweb)
 
-[README](https://github.com/brendanzab/gl-rs/tree/master/webgl_stdweb)
+[README](webgl_stdweb)
 
 WebGL bindings using stdweb
 

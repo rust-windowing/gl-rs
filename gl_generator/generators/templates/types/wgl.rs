@@ -1,31 +1,31 @@
 // From WinNT.h
 
-pub type CHAR = super::__gl_imports::raw::c_char;
+pub type CHAR = super::__gl_imports::ffi::c_char;
 pub type HANDLE = PVOID;
-pub type LONG = super::__gl_imports::raw::c_long;
-pub type LPCSTR = *const super::__gl_imports::raw::c_char;
+pub type LONG = super::__gl_imports::ffi::c_long;
+pub type LPCSTR = *const super::__gl_imports::ffi::c_char;
 pub type VOID = ();
 // #define DECLARE_HANDLE(name) struct name##__{int unused;}; typedef struct name##__ *name
-pub type HPBUFFERARB = *const super::__gl_imports::raw::c_void;
-pub type HPBUFFEREXT = *const super::__gl_imports::raw::c_void;
-pub type HVIDEOOUTPUTDEVICENV = *const super::__gl_imports::raw::c_void;
-pub type HPVIDEODEV = *const super::__gl_imports::raw::c_void;
-pub type HPGPUNV = *const super::__gl_imports::raw::c_void;
-pub type HGPUNV = *const super::__gl_imports::raw::c_void;
-pub type HVIDEOINPUTDEVICENV = *const super::__gl_imports::raw::c_void;
+pub type HPBUFFERARB = *const super::__gl_imports::ffi::c_void;
+pub type HPBUFFEREXT = *const super::__gl_imports::ffi::c_void;
+pub type HVIDEOOUTPUTDEVICENV = *const super::__gl_imports::ffi::c_void;
+pub type HPVIDEODEV = *const super::__gl_imports::ffi::c_void;
+pub type HPGPUNV = *const super::__gl_imports::ffi::c_void;
+pub type HGPUNV = *const super::__gl_imports::ffi::c_void;
+pub type HVIDEOINPUTDEVICENV = *const super::__gl_imports::ffi::c_void;
 
 // From Windef.h
 
-pub type BOOL = super::__gl_imports::raw::c_int;
-pub type BYTE = super::__gl_imports::raw::c_uchar;
+pub type BOOL = super::__gl_imports::ffi::c_int;
+pub type BYTE = super::__gl_imports::ffi::c_uchar;
 pub type COLORREF = DWORD;
-pub type FLOAT = super::__gl_imports::raw::c_float;
+pub type FLOAT = super::__gl_imports::ffi::c_float;
 pub type HDC = HANDLE;
 pub type HENHMETAFILE = HANDLE;
-pub type HGLRC = *const super::__gl_imports::raw::c_void;
-pub type INT = super::__gl_imports::raw::c_int;
-pub type PVOID = *const super::__gl_imports::raw::c_void;
-pub type LPVOID = *const super::__gl_imports::raw::c_void;
+pub type HGLRC = *const super::__gl_imports::ffi::c_void;
+pub type INT = super::__gl_imports::ffi::c_int;
+pub type PVOID = *const super::__gl_imports::ffi::c_void;
+pub type LPVOID = *const super::__gl_imports::ffi::c_void;
 pub enum __PROC_fn {}
 pub type PROC = *mut __PROC_fn;
 
@@ -37,9 +37,9 @@ pub struct RECT {
     bottom: LONG,
 }
 
-pub type UINT = super::__gl_imports::raw::c_uint;
-pub type USHORT = super::__gl_imports::raw::c_ushort;
-pub type WORD = super::__gl_imports::raw::c_ushort;
+pub type UINT = super::__gl_imports::ffi::c_uint;
+pub type USHORT = super::__gl_imports::ffi::c_ushort;
+pub type WORD = super::__gl_imports::ffi::c_ushort;
 
 // From BaseTsd.h
 
@@ -48,7 +48,7 @@ pub type INT64 = i64;
 
 // From IntSafe.h
 
-pub type DWORD = super::__gl_imports::raw::c_ulong;
+pub type DWORD = super::__gl_imports::ffi::c_ulong;
 
 // From Wingdi.h
 
