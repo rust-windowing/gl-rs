@@ -16,7 +16,7 @@ The following crates are contained in this repository:
 
 [README](https://github.com/brendanzab/gl-rs/tree/master/gl)
 
-An OpenGL function pointer loader for the Rust Programming Language.
+An no_std OpenGL function pointer loader for the Rust Programming Language.
 
 ```toml
 [dependencies]
@@ -29,7 +29,7 @@ gl = "0.14.0"
 
 [README](https://github.com/brendanzab/gl-rs/tree/master/gl_generator)
 
-Code generators for creating bindings to the Khronos OpenGL APIs.
+Code generators for creating no_std bindings to the Khronos OpenGL APIs.
 
 ```toml
 [build-dependencies]

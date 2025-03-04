@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/crates/l/gl_generator.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE)
 [![Downloads](https://img.shields.io/crates/d/gl_generator.svg)](https://crates.io/crates/gl_generator)
 
-Code generators for creating bindings to the Khronos OpenGL APIs.
+Code generators for creating no_std bindings to the Khronos OpenGL APIs.
 
 ## Usage
 
@@ -64,8 +64,32 @@ fn main() {
 }
 ```
 
-The `build.rs` file will generate all the OpenGL functions in a file named,
-`bindings.rs` plus all enumerations, and all types in the `types` submodule.
+The `build.rs` file will generate all the OpenGL functions in a file named `bindings.rs` plus all enumerations and all types in the `types` submodule. Note that while the generated bindings are `no_std`, the generator itself is not.
+
+## Symbol string types
+In previous versions, if you needed a null-terminated c-string from the `gl::load_with` function, you had to convert the &str to a CString. This limited the use of this library in `no_std` environments.
+
+In the latest release you can add the `"cstr_symbols"` feature to
+your `Cargo.toml` and the symbol name will now be a null-terminated `&CStr`, so you won't have to convert between them anymore.
+
+```rust
+// Quick example with sdl3-sys
+
+// Without the feature
+gl::load_with(| procname: &str | {
+    match CString::new(procname) { // Allocates and requires std
+        Ok(procname) => unsafe {
+           SDL_GL_GetProcAddress(procname.as_ptr()) as *const _
+        },
+        Err(_) => ptr::null(),
+    }
+});
+
+// With the feature
+gl::load_with(| procname: &CStr | {
+    unsafe { SDL_GL_GetProcAddress(procname.as_ptr()) as *const _ }
+});
+```
 
 ## Generator types
 
