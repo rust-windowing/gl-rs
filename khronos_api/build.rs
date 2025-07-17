@@ -53,7 +53,12 @@ fn main() {
             let ext_path = path.join("extension.xml");
             if ext_path.is_file() {
                 // Include the XML file, making sure to use an absolute path.
-                writeln!(file, "&*include_bytes!({:?}),", ext_path.to_str().unwrap()).unwrap();
+                let relative_path = format!("api_webgl/extensions/{}/extension.xml", ext_name);
+                writeln!(
+                    file,
+                    "&*include_bytes!(concat!(env!(\"CARGO_MANIFEST_DIR\"), \"/{}\")),",
+                    relative_path
+                ).unwrap();
             }
         }
     }
