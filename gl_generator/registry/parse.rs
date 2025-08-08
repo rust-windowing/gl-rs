@@ -289,9 +289,9 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         let mut enums = Vec::new();
         let mut cmds = Vec::new();
         let mut features = Vec::new();
-        let mut extensions = Vec::new();
+        let mut extensions = BTreeMap::new();
         let mut aliases = BTreeMap::new();
-        let mut groups: BTreeMap<String, Group> = BTreeMap::new();
+        let mut groups = BTreeMap::new();
 
         while let Some(event) = self.next() {
             match event {
@@ -330,7 +330,8 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 ParseEvent::Start(ref name, _) if name == "extensions" => loop {
                     match self.next().unwrap() {
                         ParseEvent::Start(ref name, ref attributes) if name == "extension" => {
-                            extensions.push(Extension::convert(&mut self, attributes));
+                            let ext = Extension::convert(&mut self, attributes);
+                            extensions.insert(ext.name.clone(), ext);
                         },
                         ParseEvent::End(ref name) if name == "extensions" => break,
                         event => panic!("Unexpected message {:?}", event),
@@ -380,18 +381,22 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
             panic!("Did not find version {} in the registry", filter.version);
         }
 
-        for extension in &extensions {
-            if filter.extensions.contains(&extension.name) {
-                if !extension.supported.contains(&filter.api) {
-                    panic!(
-                        "Requested {}, which doesn't support the {} API",
-                        extension.name, filter.api
-                    );
-                }
-                for require in &extension.requires {
-                    desired_enums.extend(require.enums.iter().cloned());
-                    desired_cmds.extend(require.commands.iter().cloned());
-                }
+        for extension_name in &filter.extensions {
+            let extension = extensions.get(extension_name).unwrap_or_else(|| {
+                panic!(
+                    "Requested extension `{}` not defined for the {} API",
+                    extension_name, filter.api
+                )
+            });
+            if !extension.supported.contains(&filter.api) {
+                panic!(
+                    "Requested extension `{}` doesn't support the {} API",
+                    extension.name, filter.api
+                );
+            }
+            for require in &extension.requires {
+                desired_enums.extend(require.enums.iter().cloned());
+                desired_cmds.extend(require.commands.iter().cloned());
             }
         }
 
