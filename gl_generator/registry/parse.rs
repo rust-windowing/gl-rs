@@ -1086,6 +1086,8 @@ pub fn to_rust_ty<T: AsRef<str>>(ty: T) -> Cow<'static, str> {
         "EGLnsecsANDROID *" => "*mut types::EGLnsecsANDROID",
         "EGLBoolean *" => "*mut types::EGLBoolean",
 
+        "EGLFrameTokenANGLE" => "types::khronos_uint64_t",
+
         // failure
         _ => panic!("Type conversion not implemented for `{}`", ty.as_ref()),
     };
