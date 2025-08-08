@@ -121,6 +121,7 @@ fn underscore_keyword(ident: String) -> String {
         "in" => "in_".to_string(),
         "ref" => "ref_".to_string(),
         "type" => "type_".to_string(),
+        "box" => "box_".to_string(),
         _ => ident,
     }
 }
