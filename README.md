@@ -56,29 +56,3 @@ khronos_api = "3.1.0"
 ```sh
 git submodule update --init
 ```
-
-### webgl_generator
-
-[![Version](https://img.shields.io/crates/v/webgl_generator.svg)](https://crates.io/crates/webgl_generator) [![License](https://img.shields.io/crates/l/webgl_generator.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/webgl_generator.svg)](https://crates.io/crates/webgl_generator)
-
-[README](https://github.com/brendanzab/gl-rs/tree/master/webgl_generator)
-
-Code generators for creating bindings to the WebGL APIs.
-
-```toml
-[build-dependencies]
-webgl_generator = "0.2.0"
-```
-
-### webgl-stdweb
-
-[![Version](https://img.shields.io/crates/v/webgl_stdweb.svg)](https://crates.io/crates/webgl_stdweb) [![License](https://img.shields.io/crates/l/webgl_stdweb.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE) [![Downloads](https://img.shields.io/crates/d/webgl_stdweb.svg)](https://crates.io/crates/webgl_stdweb)
-
-[README](https://github.com/brendanzab/gl-rs/tree/master/webgl_stdweb)
-
-WebGL bindings using stdweb
-
-```toml
-[build-dependencies]
-webgl_stdweb = "0.3.0"
-```
