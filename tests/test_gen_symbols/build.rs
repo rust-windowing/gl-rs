@@ -22,7 +22,7 @@ use std::path::*;
 
 fn main() {
     let dest = env::var("OUT_DIR").unwrap();
-    let mut file = File::create(&Path::new(&dest).join("test_gen_symbols.rs")).unwrap();
+    let mut file = File::create(Path::new(&dest).join("test_gen_symbols.rs")).unwrap();
 
     writeln!(&mut file, "mod gl {{").unwrap();
     Registry::new(Api::Gl, (4, 6), Profile::Core, Fallbacks::All, [])

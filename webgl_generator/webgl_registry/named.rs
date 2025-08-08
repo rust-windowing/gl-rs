@@ -108,35 +108,35 @@ pub struct VisitOptions {
 
 impl NamedType {
     pub fn as_mixin(&self) -> Option<&Mixin> {
-        if let &NamedType::Mixin(ref m) = self {
+        if let NamedType::Mixin(m) = self {
             Some(m)
         } else {
             None
         }
     }
     pub fn as_interface(&self) -> Option<&Interface> {
-        if let &NamedType::Interface(ref i) = self {
+        if let NamedType::Interface(i) = self {
             Some(i)
         } else {
             None
         }
     }
     pub fn as_dictionary(&self) -> Option<&Dictionary> {
-        if let &NamedType::Dictionary(ref d) = self {
+        if let NamedType::Dictionary(d) = self {
             Some(d)
         } else {
             None
         }
     }
     pub fn as_enum(&self) -> Option<&Enum> {
-        if let &NamedType::Enum(ref e) = self {
+        if let NamedType::Enum(e) = self {
             Some(e)
         } else {
             None
         }
     }
     pub fn as_typedef(&self) -> Option<&Type> {
-        if let &NamedType::Typedef(ref t) = self {
+        if let NamedType::Typedef(t) = self {
             Some(t)
         } else {
             None

@@ -247,10 +247,7 @@ where
                     }}
                 }}
             }}
-        "##,
-            fnname = fnname,
-            fallbacks = fallbacks,
-            symbol = symbol
+        "##
         )?;
     }
 

@@ -112,9 +112,9 @@ impl TypeKind {
     /// Also returns the "original name" if applicable.
     pub fn flatten<'a>(&'a self, registry: &'a Registry) -> (Option<&'a str>, &'a TypeKind) {
         match self {
-            &TypeKind::Primitive(ref p) => (Some(p.name()), self),
-            &TypeKind::Named(ref s) => {
-                if let &NamedType::Typedef(ref t) = registry.resolve_type(s) {
+            TypeKind::Primitive(p) => (Some(p.name()), self),
+            TypeKind::Named(s) => {
+                if let NamedType::Typedef(t) = registry.resolve_type(s) {
                     if !t.optional {
                         return (Some(s.as_str()), t.kind.flatten(registry).1);
                     }

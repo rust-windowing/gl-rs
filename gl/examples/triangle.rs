@@ -25,7 +25,7 @@ use std::str;
 static VERTEX_DATA: [GLfloat; 6] = [0.0, 0.5, 0.5, -0.5, -0.5, -0.5];
 
 // Shader sources
-static VS_SRC: &'static str = "
+static VS_SRC: &str = "
 #version 150
 in vec2 position;
 
@@ -33,7 +33,7 @@ void main() {
     gl_Position = vec4(position, 0.0, 1.0);
 }";
 
-static FS_SRC: &'static str = "
+static FS_SRC: &str = "
 #version 150
 out vec4 out_color;
 
@@ -168,20 +168,17 @@ fn main() {
         use glutin::event_loop::ControlFlow;
         *control_flow = ControlFlow::Wait;
         match event {
-            Event::LoopDestroyed => return,
-            Event::WindowEvent { event, .. } => match event {
-                WindowEvent::CloseRequested => {
-                    // Cleanup
-                    unsafe {
-                        gl::DeleteProgram(program);
-                        gl::DeleteShader(fs);
-                        gl::DeleteShader(vs);
-                        gl::DeleteBuffers(1, &vbo);
-                        gl::DeleteVertexArrays(1, &vao);
-                    }
-                    *control_flow = ControlFlow::Exit
-                },
-                _ => (),
+            Event::LoopDestroyed => (),
+            Event::WindowEvent { event, .. } => if event == WindowEvent::CloseRequested {
+                // Cleanup
+                unsafe {
+                    gl::DeleteProgram(program);
+                    gl::DeleteShader(fs);
+                    gl::DeleteShader(vs);
+                    gl::DeleteBuffers(1, &vbo);
+                    gl::DeleteVertexArrays(1, &vao);
+                }
+                *control_flow = ControlFlow::Exit
             },
             Event::RedrawRequested(_) => {
                 unsafe {

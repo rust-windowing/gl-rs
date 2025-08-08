@@ -27,8 +27,8 @@ mod named;
 mod registry;
 mod types;
 
-const HIDDEN_NAMES: &'static [&'static str] = &["WebGLObject", "WebGLContextEventInit"];
-const RENDERING_CONTEXTS: &'static [(&'static str, &'static str)] = &[
+const HIDDEN_NAMES: &[&str] = &["WebGLObject", "WebGLContextEventInit"];
+const RENDERING_CONTEXTS: &[(&str, &str)] = &[
     ("webgl", "WebGLRenderingContext"),
     ("webgl2", "WebGL2RenderingContext"),
 ];
@@ -98,9 +98,9 @@ impl<'a> Exts<'a> {
                 },
             };
 
-            if match self {
-                &Exts::Include(names) => names.contains(&&*ext.name),
-                &Exts::Exclude(names) => !names.contains(&&*ext.name),
+            if match *self {
+                Exts::Include(names) => names.contains(&&*ext.name),
+                Exts::Exclude(names) => !names.contains(&&*ext.name),
             } {
                 ext.idl = enum_regex.replace_all(&ext.idl, "${1}GLenum").into();
                 ext.idl = missing_semicolon_regex.replace_all(&ext.idl, "};").into();

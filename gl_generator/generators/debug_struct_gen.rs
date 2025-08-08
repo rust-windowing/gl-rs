@@ -215,10 +215,10 @@ where
             fallbacks = match registry.aliases.get(&cmd.proto.ident) {
                 Some(fbs) => fbs
                     .iter()
-                    .map(|name| format!("\"{}\"", super::gen_symbol_name(registry.api, &name)))
+                    .map(|name| format!("\"{}\"", super::gen_symbol_name(registry.api, name)))
                     .collect::<Vec<_>>()
                     .join(", "),
-                None => format!(""),
+                None => String::new(),
             },
         )?
     }
@@ -234,22 +234,18 @@ where
         let idents = super::gen_parameters(cmd, true, false);
         let typed_params = super::gen_parameters(cmd, false, true);
         let println = format!(
-            "println!(\"[OpenGL] {}({})\" {});",
+            "println!(\"[OpenGL] {}({})\");",
             cmd.proto.ident,
-            (0..idents.len())
-                .map(|_| "{:?}".to_string())
-                .collect::<Vec<_>>()
-                .join(", "),
             idents
                 .iter()
                 .zip(typed_params.iter())
                 .map(|(name, ty)| if ty.contains("GLDEBUGPROC") {
-                    format!(", \"<callback>\"")
+                    "<callback>".to_string()
                 } else {
-                    format!(", {}", name)
+                    format!("{{{name}:?}}")
                 })
                 .collect::<Vec<_>>()
-                .concat()
+                .join(", "),
         );
 
         writeln!(dest,
@@ -271,12 +267,11 @@ where
                                      registry
                                          .cmds
                                          .iter()
-                                         .find(|cmd| cmd.proto.ident == "GetError")
-                                         .is_some() {
-                          format!(r#"match __gl_imports::mem::transmute::<_, extern "system" fn() -> u32>
-                    (self.GetError.f)() {{ 0 => (), r => println!("[OpenGL] ^ GL error triggered: {{}}", r) }}"#)
+                                         .any(|cmd| cmd.proto.ident == "GetError") {
+                          r#"match __gl_imports::mem::transmute::<_, extern "system" fn() -> u32>
+                    (self.GetError.f)() { 0 => (), r => println!("[OpenGL] ^ GL error triggered: {r}") }"#.to_string()
                       } else {
-                          format!("")
+                          String::new()
                       })?
     }
 

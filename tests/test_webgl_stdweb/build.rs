@@ -21,8 +21,8 @@ use webgl_generator::*;
 
 fn main() {
     let dest = env::var("OUT_DIR").unwrap();
-    let mut file1 = File::create(&Path::new(&dest).join("test_webgl_stdweb.rs")).unwrap();
-    let mut file2 = File::create(&Path::new(&dest).join("test_webgl2_stdweb.rs")).unwrap();
+    let mut file1 = File::create(Path::new(&dest).join("test_webgl_stdweb.rs")).unwrap();
+    let mut file2 = File::create(Path::new(&dest).join("test_webgl2_stdweb.rs")).unwrap();
 
     Registry::new(Api::WebGl, Exts::ALL)
         .write_bindings(StdwebGenerator, &mut file1)

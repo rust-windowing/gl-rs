@@ -13,3 +13,6 @@ members = [
     "tests/test_webgl_stdweb",
     "khronos_api",
 ]
+
+[workspace.lints.clippy]
+uninlined_format_args = "deny"

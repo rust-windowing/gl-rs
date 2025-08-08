@@ -25,7 +25,7 @@ use Generator;
 
 mod parse;
 
-const BYTE_ORDER_MARK: &'static [u8] = &[0xef, 0xbb, 0xbf];
+const BYTE_ORDER_MARK: &[u8] = &[0xef, 0xbb, 0xbf];
 
 #[derive(Copy, Clone, Debug, PartialEq, Eq)]
 pub enum Api {
@@ -143,7 +143,7 @@ impl Registry {
             api,
             fallbacks,
             extensions,
-            version: format!("{}.{}", major, minor),
+            version: format!("{major}.{minor}"),
             profile,
         };
 
@@ -179,7 +179,7 @@ impl Registry {
         G: Generator,
         W: io::Write,
     {
-        generator.write(&self, output)
+        generator.write(self, output)
     }
 
     /// Returns a set of all the types used in the supplied registry. This is useful

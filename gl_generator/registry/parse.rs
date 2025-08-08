@@ -111,7 +111,7 @@ fn profile_from_str(src: &str) -> Result<Profile, ()> {
 
 fn underscore_numeric_prefix(src: &str) -> String {
     match src.chars().next() {
-        Some(c) if c.is_numeric() => format!("_{}", src),
+        Some(c) if c.is_numeric() => format!("_{src}"),
         Some(_) | None => src.to_string(),
     }
 }
@@ -173,11 +173,11 @@ fn make_enum(ident: String, ty: Option<String>, value: String, alias: Option<Str
     };
 
     Enum {
-        ident: ident,
-        value: value,
-        cast: cast,
-        alias: alias,
-        ty: ty,
+        ident,
+        value,
+        cast,
+        alias,
+        ty,
     }
 }
 
@@ -213,11 +213,11 @@ fn make_egl_enum(ident: String, ty: Option<String>, value: String, alias: Option
     };
 
     Enum {
-        ident: ident,
-        value: value,
-        cast: cast,
-        alias: alias,
-        ty: ty,
+        ident,
+        value,
+        cast,
+        alias,
+        ty,
     }
 }
 
@@ -312,8 +312,8 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 // add enum namespace
                 ParseEvent::Start(ref name, ref attributes) if name == "enums" => {
                     enums.extend(self.consume_enums(filter.api));
-                    let enums_group = get_attribute(&attributes, "group");
-                    let enums_type = get_attribute(&attributes, "type");
+                    let enums_group = get_attribute(attributes, "group");
+                    let enums_type = get_attribute(attributes, "type");
                     if let Some(group) = enums_group.and_then(|name| groups.get_mut(&name)) {
                         group.enums_type = enums_type;
                     }
@@ -327,14 +327,14 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 },
 
                 ParseEvent::Start(ref name, ref attributes) if name == "feature" => {
-                    debug!("Parsing feature: {:?}", attributes);
-                    features.push(Feature::convert(&mut self, &attributes));
+                    debug!("Parsing feature: {attributes:?}");
+                    features.push(Feature::convert(&mut self, attributes));
                 },
 
                 ParseEvent::Start(ref name, _) if name == "extensions" => loop {
                     match self.next().unwrap() {
                         ParseEvent::Start(ref name, ref attributes) if name == "extension" => {
-                            extensions.push(Extension::convert(&mut self, &attributes));
+                            extensions.push(Extension::convert(&mut self, attributes));
                         },
                         ParseEvent::End(ref name) if name == "extensions" => break,
                         event => panic!("Unexpected message {:?}", event),
@@ -358,18 +358,18 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
             // XXX: verify that the string comparison with <= actually works as desired
             if feature.api == filter.api && feature.number <= filter.version {
                 for require in &feature.requires {
-                    desired_enums.extend(require.enums.iter().map(|x| x.clone()));
-                    desired_cmds.extend(require.commands.iter().map(|x| x.clone()));
+                    desired_enums.extend(require.enums.iter().cloned());
+                    desired_cmds.extend(require.commands.iter().cloned());
                 }
 
                 for remove in &feature.removes {
                     if remove.profile == filter.profile {
                         for enm in &remove.enums {
-                            debug!("Removing {}", enm);
+                            debug!("Removing {enm}");
                             desired_enums.remove(enm);
                         }
                         for cmd in &remove.commands {
-                            debug!("Removing {}", cmd);
+                            debug!("Removing {cmd}");
                             desired_cmds.remove(cmd);
                         }
                     }
@@ -393,8 +393,8 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     );
                 }
                 for require in &extension.requires {
-                    desired_enums.extend(require.enums.iter().map(|x| x.clone()));
-                    desired_cmds.extend(require.commands.iter().map(|x| x.clone()));
+                    desired_enums.extend(require.enums.iter().cloned());
+                    desired_cmds.extend(require.commands.iter().cloned());
                 }
             }
         }
@@ -468,7 +468,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         two: &'a str,
         end: &'a str,
     ) -> (Vec<T>, Vec<U>) {
-        debug!("consume_two: looking for {} and {} until {}", one, two, end);
+        debug!("consume_two: looking for {one} and {two} until {end}");
 
         let mut ones = Vec::new();
         let mut twos = Vec::new();
@@ -476,13 +476,13 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         loop {
             match self.next().unwrap() {
                 ParseEvent::Start(ref name, ref attributes) => {
-                    debug!("Found start element <{:?} {:?}>", name, attributes);
-                    debug!("one and two are {} and {}", one, two);
+                    debug!("Found start element <{name:?} {attributes:?}>");
+                    debug!("one and two are {one} and {two}");
 
                     let n = name.clone();
 
                     if one == n {
-                        ones.push(FromXml::convert(self, &attributes));
+                        ones.push(FromXml::convert(self, attributes));
                     } else if "type" == n {
                         // XXX: GL1.1 contains types, which we never care about anyway.
                         // Make sure consume_two doesn't get used for things which *do*
@@ -490,13 +490,13 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                         warn!("Ignoring type!");
                         continue;
                     } else if two == n {
-                        twos.push(FromXml::convert(self, &attributes));
+                        twos.push(FromXml::convert(self, attributes));
                     } else {
                         panic!("Unexpected element: <{:?} {:?}>", n, &attributes);
                     }
                 },
                 ParseEvent::End(ref name) => {
-                    debug!("Found end element </{:?}>", name);
+                    debug!("Found end element </{name:?}>");
 
                     if one == name || two == name {
                         continue;
@@ -540,10 +540,10 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
     }
 
     fn consume_enum(&mut self, api: Api, attributes: &[Attribute]) -> Enum {
-        let ident = trim_enum_prefix(&get_attribute(&attributes, "name").unwrap(), api).to_string();
-        let value = get_attribute(&attributes, "value").unwrap();
-        let alias = get_attribute(&attributes, "alias");
-        let ty = get_attribute(&attributes, "type");
+        let ident = trim_enum_prefix(&get_attribute(attributes, "name").unwrap(), api).to_string();
+        let value = get_attribute(attributes, "value").unwrap();
+        let alias = get_attribute(attributes, "alias");
+        let ty = get_attribute(attributes, "type");
         self.consume_end_element("enum");
 
         match api {
@@ -557,7 +557,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         loop {
             match self.next().unwrap() {
                 ParseEvent::Start(ref name, ref attributes) if name == "group" => {
-                    let ident = get_attribute(&attributes, "name").unwrap();
+                    let ident = get_attribute(attributes, "name").unwrap();
                     let group = Group {
                         ident: ident.clone(),
                         enums_type: None,
@@ -577,7 +577,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         loop {
             match self.next().unwrap() {
                 ParseEvent::Start(ref name, ref attributes) if name == "enum" => {
-                    let enum_name = get_attribute(&attributes, "name");
+                    let enum_name = get_attribute(attributes, "name");
                     enums.push(trim_enum_prefix(&enum_name.unwrap(), api));
                     self.consume_end_element("enum");
                 },
@@ -633,18 +633,18 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     params.push(self.consume_binding("param", attributes));
                 },
                 ParseEvent::Start(ref name, ref attributes) if name == "alias" => {
-                    alias = get_attribute(&attributes, "name");
+                    alias = get_attribute(attributes, "name");
                     alias = alias.map(|t| trim_cmd_prefix(&t, api).to_string());
                     self.consume_end_element("alias");
                 },
                 ParseEvent::Start(ref name, ref attributes) if name == "vecequiv" => {
-                    vecequiv = get_attribute(&attributes, "vecequiv");
+                    vecequiv = get_attribute(attributes, "vecequiv");
                     self.consume_end_element("vecequiv");
                 },
                 ParseEvent::Start(ref name, ref attributes) if name == "glx" => {
                     glx = Some(GlxOpcode {
-                        opcode: get_attribute(&attributes, "opcode").unwrap(),
-                        name: get_attribute(&attributes, "name"),
+                        opcode: get_attribute(attributes, "opcode").unwrap(),
+                        name: get_attribute(attributes, "name"),
                     });
                     self.consume_end_element("glx");
                 },
@@ -654,11 +654,11 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         }
 
         Cmd {
-            proto: proto,
-            params: params,
-            alias: alias,
-            vecequiv: vecequiv,
-            glx: glx,
+            proto,
+            params,
+            alias,
+            vecequiv,
+            glx,
         }
     }
 
@@ -689,9 +689,9 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         }
 
         Binding {
-            ident: ident,
+            ident,
             ty: to_rust_ty(ty),
-            group: get_attribute(&attributes, "group"),
+            group: get_attribute(attributes, "group"),
         }
     }
 }
@@ -714,8 +714,8 @@ impl FromXml for Require {
         debug!("Doing a FromXml on Require");
         let (enums, commands) = parser.consume_two("enum", "command", "require");
         Require {
-            enums: enums,
-            commands: commands,
+            enums,
+            commands,
         }
     }
 }
@@ -728,9 +728,9 @@ impl FromXml for Remove {
         let (enums, commands) = parser.consume_two("enum", "command", "remove");
 
         Remove {
-            profile: profile,
-            enums: enums,
-            commands: commands,
+            profile,
+            enums,
+            commands,
         }
     }
 }
@@ -743,14 +743,14 @@ impl FromXml for Feature {
         let name = get_attribute(a, "name").unwrap();
         let number = get_attribute(a, "number").unwrap();
 
-        debug!("Found api = {}, name = {}, number = {}", api, name, number);
+        debug!("Found api = {api}, name = {name}, number = {number}");
 
         let (require, remove) = parser.consume_two("require", "remove", "feature");
 
         Feature {
-            api: api,
-            name: name,
-            number: number,
+            api,
+            name,
+            number,
             requires: require,
             removes: remove,
         }
@@ -772,7 +772,7 @@ impl FromXml for Extension {
         loop {
             match parser.next().unwrap() {
                 ParseEvent::Start(ref name, ref attributes) if name == "require" => {
-                    require.push(FromXml::convert(parser, &attributes));
+                    require.push(FromXml::convert(parser, attributes));
                 },
                 ParseEvent::End(ref name) if name == "extension" => break,
                 event => panic!("Unexpected message {:?}", event),
@@ -780,8 +780,8 @@ impl FromXml for Extension {
         }
 
         Extension {
-            name: name,
-            supported: supported,
+            name,
+            supported,
             requires: require,
         }
     }
@@ -1174,7 +1174,7 @@ mod tests {
             assert_eq!(e.value, "value");
             assert_eq!(e.alias, Some("BAR".to_string()));
             assert_eq!(e.ty, "GLenum");
-            assert_eq!(e.cast, false);
+            assert!(!e.cast);
         }
 
         #[test]

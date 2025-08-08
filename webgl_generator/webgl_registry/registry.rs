@@ -44,7 +44,7 @@ impl<'a, T: 'a, F: FnMut(&'a NamedType) -> Option<&'a T>> Iterator for TypeIter<
     type Item = (&'a String, &'a T);
     fn next(&mut self) -> Option<Self::Item> {
         // Implement a variation of `flat_map`
-        while let Some((k, v)) = self.inner.next() {
+        for (k, v) in self.inner.by_ref() {
             if let Some(t) = (self.f)(v) {
                 return Some((k, t));
             }
@@ -102,7 +102,7 @@ impl Registry {
 
         // Find the latest version of the rendering context, and generate a
         // version-independent rendering context helper type called "GLContext".
-        for name in RENDERING_CONTEXTS.into_iter().rev() {
+        for name in RENDERING_CONTEXTS.iter().rev() {
             if let Some(NamedType::Interface(mut iface)) = result.types.get(name.1).cloned() {
                 iface.rendering_context = None;
                 result
@@ -157,7 +157,7 @@ impl Registry {
         G: Generator,
         W: io::Write,
     {
-        generator.write(&self, output)
+        generator.write(self, output)
     }
 
     fn load_const(&mut self, const_: ast::Const) -> Option<(String, Member)> {
@@ -293,7 +293,7 @@ impl Registry {
             use self::ast::ExtendedAttribute::*;
             for attr in attrs {
                 if let NoArguments(ref other) = *attr {
-                    if let &ast::Other::Identifier(ref n) = other {
+                    if let ast::Other::Identifier(n) = other {
                         return n == name;
                     }
                 }

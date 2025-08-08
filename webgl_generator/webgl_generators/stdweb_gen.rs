@@ -84,10 +84,10 @@ impl ArgWrapper {
             &ArgWrapper::AsArrayBufferView => {
                 format!("unsafe {{ {}.as_array_buffer_view() }}", arg)
             },
-            &ArgWrapper::Optional(ref inner) => {
+            ArgWrapper::Optional(inner) => {
                 format!("{}.map(|inner| {})", arg, inner.wrap("inner"))
             },
-            &ArgWrapper::Sequence(ref inner) => format!(
+            ArgWrapper::Sequence(inner) => format!(
                 "{}.iter().map(|inner| {}).collect::<Vec<_>>()",
                 arg,
                 inner.wrap("inner")
@@ -122,13 +122,13 @@ fn process_arg_type_kind(
 ) -> ProcessedArg {
     let (name, flat_kind) = type_kind.flatten(registry);
     match flat_kind {
-        &TypeKind::Primitive(ref p) => match p {
-            &Primitive::I64 => ProcessedArg {
+        TypeKind::Primitive(p) => match *p {
+            Primitive::I64 => ProcessedArg {
                 type_: name.unwrap().into(),
                 wrapper: ArgWrapper::DoubleCast,
                 optional: false,
             },
-            &Primitive::U64 => ProcessedArg {
+            Primitive::U64 => ProcessedArg {
                 type_: name.unwrap().into(),
                 wrapper: ArgWrapper::DoubleCast,
                 optional: false,
@@ -139,7 +139,7 @@ fn process_arg_type_kind(
         &TypeKind::ArrayBuffer => ProcessedArg::simple("&ArrayBuffer"),
         &TypeKind::BufferSource => ProcessedArg::simple("&ArrayBuffer"),
         &TypeKind::CanvasElement => ProcessedArg::simple("&CanvasElement"),
-        &TypeKind::TypedArray(ref p) => {
+        TypeKind::TypedArray(p) => {
             let lt = gc.arg("'a");
             let gp = gc.arg("T");
             gc.constrain(format!("{}: AsTypedArray<{}, {}>", gp, lt, p.name()));
@@ -159,7 +159,7 @@ fn process_arg_type_kind(
                 optional: false,
             }
         },
-        &TypeKind::Sequence(ref t) => {
+        TypeKind::Sequence(t) => {
             let inner = process_arg_type(t, registry, gc);
             ProcessedArg {
                 type_: format!("&[{}]", inner.type_),
@@ -170,7 +170,7 @@ fn process_arg_type_kind(
                 optional: false,
             }
         },
-        &TypeKind::Union(ref ts) => {
+        TypeKind::Union(ts) => {
             let t = ts
                 .iter()
                 .filter_map(|t| match t.kind {
@@ -183,13 +183,13 @@ fn process_arg_type_kind(
 
             process_arg_type(t, registry, gc)
         },
-        &TypeKind::Named(ref actual_name) => {
+        TypeKind::Named(actual_name) => {
             match registry.resolve_type(actual_name) {
                 &NamedType::Dictionary(_) | &NamedType::Interface(_) => {
                     ProcessedArg::simple(format!("&{}", name.unwrap()))
                 },
                 &NamedType::Enum(_) => ProcessedArg::simple(name.unwrap()),
-                &NamedType::Typedef(ref t) => {
+                NamedType::Typedef(t) => {
                     // We have to "look through" the typedef, as the correct parameter
                     // type is not representable using the alias.
                     assert!(t.optional);
@@ -236,9 +236,9 @@ enum ResultWrapper {
 
 impl ResultWrapper {
     fn wrap(&self, content: &str) -> String {
-        match self {
-            &ResultWrapper::TryInto => format!("{}.try_into().unwrap()", content),
-            &ResultWrapper::Ok => format!("{}.try_into().ok()", content),
+        match *self {
+            ResultWrapper::TryInto => format!("{}.try_into().unwrap()", content),
+            ResultWrapper::Ok => format!("{}.try_into().ok()", content),
         }
     }
 }
@@ -262,21 +262,21 @@ impl ProcessedResult {
 
 fn process_result_type_kind(type_kind: &TypeKind, registry: &Registry) -> ProcessedResult {
     match type_kind {
-        &TypeKind::Primitive(ref p) => ProcessedResult::simple(p.name()),
+        TypeKind::Primitive(p) => ProcessedResult::simple(p.name()),
         &TypeKind::String => ProcessedResult::simple("String"),
         &TypeKind::ArrayBuffer | &TypeKind::ArrayBufferView => {
             ProcessedResult::simple("ArrayBuffer")
         },
         &TypeKind::BufferSource => unimplemented!("BufferSource not supported in output"),
         &TypeKind::CanvasElement => ProcessedResult::simple("CanvasElement"),
-        &TypeKind::TypedArray(ref p) => {
+        TypeKind::TypedArray(p) => {
             ProcessedResult::simple(format!("TypedArray<{}>", p.name()))
         },
-        &TypeKind::Sequence(ref t) => {
+        TypeKind::Sequence(t) => {
             let inner = process_result_type(t, registry);
             ProcessedResult::simple(format!("Vec<{}>", inner.type_))
         },
-        &TypeKind::Union(ref ts) => {
+        TypeKind::Union(ts) => {
             let t = ts
                 .iter()
                 .filter_map(|t| match t.kind {
@@ -289,11 +289,11 @@ fn process_result_type_kind(type_kind: &TypeKind, registry: &Registry) -> Proces
 
             process_result_type(t, registry)
         },
-        &TypeKind::Named(ref name) => match registry.resolve_type(name) {
+        TypeKind::Named(name) => match registry.resolve_type(name) {
             &NamedType::Dictionary(_) | &NamedType::Interface(_) | &NamedType::Enum(_) => {
                 ProcessedResult::simple(name.as_str())
             },
-            &NamedType::Typedef(ref t) => {
+            NamedType::Typedef(t) => {
                 let inner = process_result_type(t, registry);
                 ProcessedResult {
                     type_: name.clone(),
@@ -460,7 +460,7 @@ pub enum {name} {{
             r#"
     #[serde(rename = "{raw_variant}")]
     {variant},"#,
-            variant = camel(&variant),
+            variant = camel(variant),
             raw_variant = variant
         )?;
     }
@@ -613,16 +613,16 @@ impl {name} {{
     for (name, members) in interface.collect_members(registry, &VisitOptions::default()) {
         for (index, member) in members.into_iter().enumerate() {
             match member {
-                &Member::Const(ref const_) => {
+                Member::Const(const_) => {
                     assert!(index == 0);
-                    write_const(&name, const_, registry, dest)?;
+                    write_const(name, const_, registry, dest)?;
                 },
-                &Member::Attribute(ref attribute) => {
+                Member::Attribute(attribute) => {
                     assert!(index == 0);
-                    write_attribute(&name, attribute, registry, dest)?;
+                    write_attribute(name, attribute, registry, dest)?;
                 },
-                &Member::Operation(ref operation) => {
-                    write_operation(&name, index, operation, registry, dest)?;
+                Member::Operation(operation) => {
+                    write_operation(name, index, operation, registry, dest)?;
                 },
             }
         }
@@ -763,10 +763,7 @@ fn write_operation<W>(
 where
     W: io::Write,
 {
-    match name {
-        "getExtension" => return write_get_extension(dest),
-        _ => {},
-    }
+    if name == "getExtension" { return write_get_extension(dest) }
 
     let mut rust_name = unreserve(snake(name));
     if index > 0 {

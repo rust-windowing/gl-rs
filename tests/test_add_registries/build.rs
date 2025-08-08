@@ -21,7 +21,7 @@ use std::path::*;
 
 fn main() {
     let dest = env::var("OUT_DIR").unwrap();
-    let mut file = File::create(&Path::new(&dest).join("test_add_registries.rs")).unwrap();
+    let mut file = File::create(Path::new(&dest).join("test_add_registries.rs")).unwrap();
 
     let registry0 = Registry::new(Api::Gl, (3, 2), Profile::Core, Fallbacks::All, []);
     let registry1 = Registry::new(Api::Gl, (3, 2), Profile::Core, Fallbacks::All, []);

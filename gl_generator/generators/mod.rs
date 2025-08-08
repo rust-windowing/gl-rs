@@ -98,7 +98,7 @@ pub fn gen_parameters(cmd: &Cmd, with_idents: bool, with_types: bool) -> Vec<Str
             } else if with_types {
                 format!("{}", binding.ty)
             } else if with_idents {
-                format!("{}", binding.ident)
+                binding.ident.to_string()
             } else {
                 panic!()
             }
@@ -111,9 +111,9 @@ pub fn gen_parameters(cmd: &Cmd, with_idents: bool, with_types: bool) -> Vec<Str
 /// Example results: `"glClear"`, `"wglCreateContext"`, etc.
 pub fn gen_symbol_name(api: Api, cmd: &str) -> String {
     match api {
-        Api::Gl | Api::GlCore | Api::Gles1 | Api::Gles2 | Api::Glsc2 => format!("gl{}", cmd),
-        Api::Glx => format!("glX{}", cmd),
-        Api::Wgl => format!("wgl{}", cmd),
-        Api::Egl => format!("egl{}", cmd),
+        Api::Gl | Api::GlCore | Api::Gles1 | Api::Gles2 | Api::Glsc2 => format!("gl{cmd}"),
+        Api::Glx => format!("glX{cmd}"),
+        Api::Wgl => format!("wgl{cmd}"),
+        Api::Egl => format!("egl{cmd}"),
     }
 }

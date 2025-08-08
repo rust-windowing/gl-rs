@@ -15,7 +15,7 @@ repository = "https://github.com/brendanzab/gl-rs/"
 readme = "README.md"
 
 # Only include what we need here. The git submodules are quite large, and would
-# exceed the maximimum crate size if we didn't do this
+# exceed the maximum crate size if we didn't do this
 include = [
   "/README.md",
   "/src/**/*",
@@ -30,3 +30,6 @@ include = [
 
 categories = ["rendering::graphics-api"]
 keywords = ["gl", "egl", "opengl", "khronos"]
+
+[lints]
+workspace = true

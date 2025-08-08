@@ -5,7 +5,7 @@ use webidl::{self, ast};
 
 /// Helper method for inserting into a BTreeMap-based multi-map
 pub fn multimap_insert<K: Ord, V: PartialEq>(m: &mut BTreeMap<K, Vec<V>>, key: K, value: V) {
-    let v = m.entry(key).or_insert_with(Vec::new);
+    let v = m.entry(key).or_default();
     if !v.contains(&value) {
         v.push(value);
     }
@@ -39,7 +39,7 @@ pub fn convert_html_to_doc_comment(html: &str) -> String {
 
 /// Appends an underscore to a name if it conflicts with a reserved word.
 pub fn unreserve<S: Into<String>>(name: S) -> String {
-    const RESERVED_WORDS: &'static [&'static str] = &[
+    const RESERVED_WORDS: &[&str] = &[
         "as", "break", "const", "continue", "crate", "else", "enum", "extern", "false", "fn",
         "for", "if", "impl", "in", "let", "loop", "match", "mod", "move", "mut", "pub", "ref",
         "return", "Self", "self", "static", "struct", "super", "trait", "true", "type", "unsafe",

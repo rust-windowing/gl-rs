@@ -23,7 +23,7 @@ use std::path::*;
 fn main() {
     // Create and open a file in the output directory to contain our generated rust code
     let dest = env::var("OUT_DIR").unwrap();
-    let mut file = File::create(&Path::new(&dest).join("webgl_exts.rs")).unwrap();
+    let mut file = File::create(Path::new(&dest).join("webgl_exts.rs")).unwrap();
 
     // Find the absolute path to the folder containing the WebGL extensions.
     // The absolute path is needed, because we don't know where the output

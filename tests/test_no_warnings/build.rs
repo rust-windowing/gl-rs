@@ -22,7 +22,7 @@ use std::path::*;
 
 fn main() {
     let dest = env::var("OUT_DIR").unwrap();
-    let mut file = File::create(&Path::new(&dest).join("test_no_warnings.rs")).unwrap();
+    let mut file = File::create(Path::new(&dest).join("test_no_warnings.rs")).unwrap();
 
     // Gl
 

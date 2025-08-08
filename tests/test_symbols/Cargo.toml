@@ -9,3 +9,6 @@ path = "lib.rs"
 
 [build-dependencies]
 gl_generator = { path = "../../gl_generator" }
+
+[lints]
+workspace = true

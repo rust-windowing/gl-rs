@@ -36,7 +36,7 @@ pub fn compile_test_symbols_exist() {
 fn test_fallback_works() {
     fn loader(name: &str) -> *const raw::c_void {
         match name {
-            "glGenFramebuffers" => 0 as *const raw::c_void,
+            "glGenFramebuffers" => std::ptr::null::<raw::c_void>(),
             "glGenFramebuffersEXT" => 42 as *const raw::c_void,
             name => panic!("test tried to load {} unexpectedly!", name),
         }

@@ -215,10 +215,10 @@ where
             fallbacks = match registry.aliases.get(&cmd.proto.ident) {
                 Some(fbs) => fbs
                     .iter()
-                    .map(|name| format!("\"{}\"", super::gen_symbol_name(registry.api, &name)))
+                    .map(|name| format!("\"{}\"", super::gen_symbol_name(registry.api, name)))
                     .collect::<Vec<_>>()
                     .join(", "),
-                None => format!(""),
+                None => String::new(),
             },
         )?
     }
