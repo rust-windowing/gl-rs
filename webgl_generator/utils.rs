@@ -31,7 +31,7 @@ pub fn convert_html_to_doc_comment(html: &str) -> String {
     // Create doc comments
     let doc_comment_regex = RegexBuilder::new("^").multi_line(true).build().unwrap();
 
-    let md = html2runes::markdown::convert_string(html);
+    let md = html2text::from_read(std::io::Cursor::new(html), 100).unwrap();
     let mut doc = doc_comment_regex.replace_all(md.trim_end(), "/// ").into();
     doc += "\n";
     doc

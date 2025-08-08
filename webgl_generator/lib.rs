@@ -17,7 +17,7 @@
 //!
 //! See the `webgl` crate for an example of use.
 extern crate heck;
-extern crate html2runes;
+extern crate html2text;
 extern crate khronos_api;
 extern crate regex;
 extern crate webidl;
