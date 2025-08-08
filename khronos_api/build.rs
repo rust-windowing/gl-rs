@@ -25,11 +25,8 @@ fn main() {
     let dest = env::var("OUT_DIR").unwrap();
     let mut file = File::create(Path::new(&dest).join("webgl_exts.rs")).unwrap();
 
-    // Find the absolute path to the folder containing the WebGL extensions.
-    // The absolute path is needed, because we don't know where the output
-    // directory will be, and `include_bytes!(..)` resolves paths relative to the
-    // containing file.
-    let root = env::current_dir().unwrap().join("api_webgl/extensions");
+    // The relative path within this crate containing the WebGL extensions.
+    let root = Path::new("api_webgl/extensions");
 
     // Generate a slice literal, looking like this:
     // `&[&*include_bytes!(..), &*include_bytes!(..), ..]`
@@ -56,8 +53,17 @@ fn main() {
             // really is an extension.
             let ext_path = path.join("extension.xml");
             if ext_path.is_file() {
-                // Include the XML file, making sure to use an absolute path.
-                writeln!(file, "&*include_bytes!({:?}),", ext_path.to_str().unwrap()).unwrap();
+                // Include the XML file.
+                writeln!(
+                    file,
+                    // The path of the crate must be resolved at compile-time of the generated code
+                    // using this environment variable, not at runtime of this build script using
+                    // current_dir() or canonicalization.  These will differ on at least Bazel
+                    // when/where the build script is containerized.
+                    r#"&*include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/{}")),"#,
+                    ext_path.to_str().unwrap()
+                )
+                .unwrap();
             }
         }
     }
