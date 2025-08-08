@@ -250,6 +250,7 @@ struct Feature {
 
 #[derive(Clone)]
 struct Require {
+    pub api: Option<Api>,
     /// A reference to the earlier types, by name
     pub enums: Vec<String>,
     /// A reference to the earlier types, by name
@@ -395,8 +396,14 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 );
             }
             for require in &extension.requires {
-                desired_enums.extend(require.enums.iter().cloned());
-                desired_cmds.extend(require.commands.iter().cloned());
+                // TODO: Just like enums, this filter should be moved to the point where the element
+                // is parsed so that we can skip it directly, filter.api is already known at that
+                // point.  The same is true for <feature> and <extension>, though the latter allows
+                // us to provide a more useful message to the user.
+                if require.api.is_none_or(|a| a == filter.api) {
+                    desired_enums.extend(require.enums.iter().cloned());
+                    desired_cmds.extend(require.commands.iter().cloned());
+                }
             }
         }
 
@@ -528,7 +535,12 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
 
                 // add enum definition
                 ParseEvent::Start(ref name, ref attributes) if name == "enum" => {
-                    enums.push(self.consume_enum(api, attributes));
+                    let enum_api = get_attribute(attributes, "api")
+                        .map(|api| api_from_str(&api).unwrap().unwrap());
+                    let enm = self.consume_enum(api, attributes);
+                    if enum_api.is_none_or(|a| a == api) {
+                        enums.push(enm);
+                    }
                 },
 
                 // finished building the namespace
@@ -711,10 +723,15 @@ trait FromXml {
 }
 
 impl FromXml for Require {
-    fn convert<P: Parse>(parser: &mut P, _: &[Attribute]) -> Require {
+    fn convert<P: Parse>(parser: &mut P, a: &[Attribute]) -> Require {
         debug!("Doing a FromXml on Require");
+        let api = get_attribute(a, "api").map(|api| api_from_str(&api).unwrap().unwrap());
         let (enums, commands) = parser.consume_two("enum", "command", "require");
-        Require { enums, commands }
+        Require {
+            api,
+            enums,
+            commands,
+        }
     }
 }
 
