@@ -301,20 +301,28 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 ParseEvent::Text(_) => (),
                 ParseEvent::Start(ref name, _) if name == "comment" => self.skip_to_end("comment"),
                 ParseEvent::Start(ref name, _) if name == "types" => self.skip_to_end("types"),
-
-                // add group namespace
+                // ignore groups, they are deprecated in favour of `<enums group="">` elements which
+                // are above all easier to parse like that.
                 ParseEvent::Start(ref name, _) if name == "groups" => {
-                    groups.extend(self.consume_groups(filter.api));
+                    self.skip_to_end("groups");
                 },
 
                 // add enum namespace
                 ParseEvent::Start(ref name, ref attributes) if name == "enums" => {
-                    enums.extend(self.consume_enums(filter.api));
+                    let enms = self.consume_enums(filter.api);
+                    enums.extend(enms.iter().cloned());
                     let enums_group = get_attribute(attributes, "group");
                     let enums_type = get_attribute(attributes, "type");
-                    // TODO UNWRAP
-                    if let Some(group) = enums_group.and_then(|name| groups.get_mut(&name)) {
-                        group.enums_type = enums_type;
+                    if let Some(group) = enums_group {
+                        let prev = groups.insert(
+                            group.clone(),
+                            Group {
+                                ident: group.clone(),
+                                enums_type,
+                                enums: vec![],
+                            },
+                        );
+                        assert!(prev.is_none(), "Group {group} is already inserted");
                     }
                 },
 
@@ -568,42 +576,6 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 _ => make_enum(ident, ty, value, alias),
             },
         )
-    }
-
-    fn consume_groups(&mut self, api: Api) -> BTreeMap<String, Group> {
-        let mut groups = BTreeMap::new();
-        loop {
-            match self.next().unwrap() {
-                ParseEvent::Start(ref name, ref attributes) if name == "group" => {
-                    let ident = get_attribute(attributes, "name").unwrap();
-                    let group = Group {
-                        ident: ident.clone(),
-                        enums_type: None,
-                        enums: self.consume_group_enums(api),
-                    };
-                    groups.insert(ident, group);
-                },
-                ParseEvent::End(ref name) if name == "groups" => break,
-                event => panic!("Expected </groups>, found: {:?}", event),
-            }
-        }
-        groups
-    }
-
-    fn consume_group_enums(&mut self, api: Api) -> Vec<String> {
-        let mut enums = Vec::new();
-        loop {
-            match self.next().unwrap() {
-                ParseEvent::Start(ref name, ref attributes) if name == "enum" => {
-                    let enum_name = get_attribute(attributes, "name");
-                    enums.push(trim_enum_prefix(&enum_name.unwrap(), api));
-                    self.consume_end_element("enum");
-                },
-                ParseEvent::End(ref name) if name == "group" => break,
-                event => panic!("Expected </group>, found: {:?}", event),
-            }
-        }
-        enums
     }
 
     fn consume_cmds(&mut self, api: Api) -> (Vec<(String, Cmd)>, BTreeMap<String, Vec<String>>) {
