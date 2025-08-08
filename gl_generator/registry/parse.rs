@@ -126,11 +126,7 @@ fn underscore_keyword(ident: String) -> String {
 }
 
 fn trim_str<'a>(s: &'a str, trim: &str) -> &'a str {
-    if s.starts_with(trim) {
-        &s[trim.len()..]
-    } else {
-        s
-    }
+    s.strip_prefix(trim).unwrap_or(s)
 }
 
 fn trim_enum_prefix(ident: &str, api: Api) -> String {
@@ -164,7 +160,7 @@ fn make_enum(ident: String, ty: Option<String>, value: String, alias: Option<Str
                 Some(ref ty) if ty == "u" => "GLuint",
                 Some(ref ty) if ty == "ull" => "GLuint64",
                 Some(ty) => panic!("Unhandled enum type: {}", ty),
-                None if value.starts_with("\"") => "&'static str",
+                None if value.starts_with("\"") => "&str",
                 None if ident == "TRUE" || ident == "FALSE" => "GLboolean",
                 None => "GLenum",
             };
@@ -246,7 +242,7 @@ fn merge_map(a: &mut BTreeMap<String, Vec<String>>, b: BTreeMap<String, Vec<Stri
 #[derive(Clone)]
 struct Feature {
     pub api: Api,
-    pub name: String,
+    pub _name: String,
     pub number: String,
     pub requires: Vec<Require>,
     pub removes: Vec<Remove>,
@@ -713,10 +709,7 @@ impl FromXml for Require {
     fn convert<P: Parse>(parser: &mut P, _: &[Attribute]) -> Require {
         debug!("Doing a FromXml on Require");
         let (enums, commands) = parser.consume_two("enum", "command", "require");
-        Require {
-            enums,
-            commands,
-        }
+        Require { enums, commands }
     }
 }
 
@@ -749,7 +742,7 @@ impl FromXml for Feature {
 
         Feature {
             api,
-            name,
+            _name: name,
             number,
             requires: require,
             removes: remove,

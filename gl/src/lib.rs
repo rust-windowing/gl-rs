@@ -72,5 +72,16 @@
 
 #![crate_name = "gl"]
 #![crate_type = "lib"]
+#![allow(
+    clippy::missing_safety_doc,
+    clippy::missing_transmute_annotations,
+    clippy::too_many_arguments,
+    clippy::unused_unit
+)]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
+
+// #[test]
+// fn x() {
+//     ActiveShaderProgram()
+// }

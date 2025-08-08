@@ -13,5 +13,11 @@
 // limitations under the License.
 
 pub mod gl {
+    #![allow(
+        clippy::missing_safety_doc,
+        clippy::missing_transmute_annotations,
+        clippy::too_many_arguments,
+        clippy::unused_unit
+    )]
     include!(concat!(env!("OUT_DIR"), "/test_add_registries.rs"));
 }

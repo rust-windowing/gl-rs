@@ -53,7 +53,7 @@ where
     writeln!(dest,
         "#[allow(dead_code, non_upper_case_globals)] pub const {ident}: {types_prefix}{ty} = {value}{cast_suffix};",
         ident = enm.ident,
-        types_prefix = if enm.ty == "&'static str" { "" } else { types_prefix },
+        types_prefix = if enm.ty == "&str" { "" } else { types_prefix },
         ty = enm.ty,
         value = enm.value,
         cast_suffix = match enm.cast {

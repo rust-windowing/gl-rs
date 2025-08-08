@@ -34,7 +34,11 @@ fn main() {
         *control_flow = ControlFlow::Wait;
         match event {
             Event::LoopDestroyed => (),
-            Event::WindowEvent { event, .. } => if event == WindowEvent::CloseRequested { *control_flow = ControlFlow::Exit },
+            Event::WindowEvent { event, .. } => {
+                if event == WindowEvent::CloseRequested {
+                    *control_flow = ControlFlow::Exit
+                }
+            },
             Event::RedrawRequested(_) => {
                 unsafe {
                     gl::ClearColor(0.3, 0.3, 0.3, 1.0);

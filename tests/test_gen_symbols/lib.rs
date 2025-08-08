@@ -12,6 +12,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#![allow(
+    clippy::missing_transmute_annotations,
+    clippy::too_many_arguments,
+    clippy::unused_unit,
+    clippy::upper_case_acronyms
+)]
+
 use std::os::raw;
 
 include!(concat!(env!("OUT_DIR"), "/test_gen_symbols.rs"));
@@ -54,18 +61,14 @@ pub fn compile_test_glsc2() {
 
 pub fn compile_test_glx() {
     unsafe {
-        let _ = glx::GetProcAddress(std::mem::MaybeUninit::uninit().assume_init());
-        glx::SwapBuffers(
-            std::mem::MaybeUninit::uninit().assume_init(),
-            std::mem::MaybeUninit::uninit().assume_init(),
-        );
+        let _ = glx::GetProcAddress(std::ptr::null());
+        glx::SwapBuffers(std::ptr::null_mut(), 0);
     }
 }
 
 pub fn compile_test_wgl() {
     unsafe {
-        let _: wgl::types::HGLRC =
-            wgl::CreateContext(std::mem::MaybeUninit::uninit().assume_init());
+        let _: wgl::types::HGLRC = wgl::CreateContext(std::ptr::null());
     }
 }
 
@@ -84,6 +87,6 @@ pub fn compile_test_egl() {
         ];
 
         let _ = egl::GetDisplay(egl::DEFAULT_DISPLAY);
-        egl::Terminate(std::mem::MaybeUninit::uninit().assume_init());
+        egl::Terminate(std::ptr::null());
     }
 }

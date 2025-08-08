@@ -17,7 +17,6 @@ extern crate glutin;
 
 use gl::types::*;
 use std::ffi::CString;
-use std::mem;
 use std::ptr;
 use std::str;
 
@@ -57,20 +56,19 @@ fn compile_shader(src: &str, ty: GLenum) -> GLuint {
         // Fail on error
         if status != (gl::TRUE as GLint) {
             let mut len = 0;
+            let mut outlen = 0;
             gl::GetShaderiv(shader, gl::INFO_LOG_LENGTH, &mut len);
             let mut buf = Vec::with_capacity(len as usize);
-            buf.set_len((len as usize) - 1); // subtract 1 to skip the trailing null character
             gl::GetShaderInfoLog(
                 shader,
                 len,
-                ptr::null_mut(),
+                &mut outlen, // Number of characters written excluding null terminator
                 buf.as_mut_ptr() as *mut GLchar,
             );
+            buf.set_len(outlen as usize);
             panic!(
                 "{}",
-                str::from_utf8(&buf)
-                    .ok()
-                    .expect("ShaderInfoLog not valid utf8")
+                str::from_utf8(&buf).expect("ShaderInfoLog not valid utf8")
             );
         }
     }
@@ -89,21 +87,20 @@ fn link_program(vs: GLuint, fs: GLuint) -> GLuint {
 
         // Fail on error
         if status != (gl::TRUE as GLint) {
-            let mut len: GLint = 0;
+            let mut len = 0;
+            let mut outlen = 0;
             gl::GetProgramiv(program, gl::INFO_LOG_LENGTH, &mut len);
             let mut buf = Vec::with_capacity(len as usize);
-            buf.set_len((len as usize) - 1); // subtract 1 to skip the trailing null character
             gl::GetProgramInfoLog(
                 program,
                 len,
-                ptr::null_mut(),
+                &mut outlen, // Number of characters written excluding null terminator
                 buf.as_mut_ptr() as *mut GLchar,
             );
+            buf.set_len(outlen as usize);
             panic!(
                 "{}",
-                str::from_utf8(&buf)
-                    .ok()
-                    .expect("ProgramInfoLog not valid utf8")
+                str::from_utf8(&buf).expect("ProgramInfoLog not valid utf8")
             );
         }
         program
@@ -141,8 +138,8 @@ fn main() {
         gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
         gl::BufferData(
             gl::ARRAY_BUFFER,
-            (VERTEX_DATA.len() * mem::size_of::<GLfloat>()) as GLsizeiptr,
-            mem::transmute(&VERTEX_DATA[0]),
+            size_of_val(&VERTEX_DATA) as GLsizeiptr,
+            VERTEX_DATA.as_ptr().cast(),
             gl::STATIC_DRAW,
         );
 
@@ -169,16 +166,18 @@ fn main() {
         *control_flow = ControlFlow::Wait;
         match event {
             Event::LoopDestroyed => (),
-            Event::WindowEvent { event, .. } => if event == WindowEvent::CloseRequested {
-                // Cleanup
-                unsafe {
-                    gl::DeleteProgram(program);
-                    gl::DeleteShader(fs);
-                    gl::DeleteShader(vs);
-                    gl::DeleteBuffers(1, &vbo);
-                    gl::DeleteVertexArrays(1, &vao);
+            Event::WindowEvent { event, .. } => {
+                if event == WindowEvent::CloseRequested {
+                    // Cleanup
+                    unsafe {
+                        gl::DeleteProgram(program);
+                        gl::DeleteShader(fs);
+                        gl::DeleteShader(vs);
+                        gl::DeleteBuffers(1, &vbo);
+                        gl::DeleteVertexArrays(1, &vao);
+                    }
+                    *control_flow = ControlFlow::Exit
                 }
-                *control_flow = ControlFlow::Exit
             },
             Event::RedrawRequested(_) => {
                 unsafe {

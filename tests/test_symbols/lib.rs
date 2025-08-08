@@ -15,6 +15,13 @@
 use std::os::raw;
 
 pub mod gl {
+    #![allow(
+        clippy::missing_safety_doc,
+        clippy::missing_transmute_annotations,
+        clippy::too_many_arguments,
+        clippy::unused_unit
+    )]
+
     include!(concat!(env!("OUT_DIR"), "/test_symbols.rs"));
 }
 
@@ -40,7 +47,7 @@ fn test_fallback_works() {
             "glGenFramebuffersEXT" => 42 as *const raw::c_void,
             name => panic!("test tried to load {} unexpectedly!", name),
         }
-    };
+    }
 
     gl::GenFramebuffers::load_with(loader);
     assert!(gl::GenFramebuffers::is_loaded());
