@@ -121,6 +121,7 @@ fn underscore_keyword(ident: String) -> String {
         "in" => "in_".to_string(),
         "ref" => "ref_".to_string(),
         "type" => "type_".to_string(),
+        "box" => "box_".to_string(),
         _ => ident,
     }
 }
@@ -250,6 +251,7 @@ struct Feature {
 
 #[derive(Clone)]
 struct Require {
+    pub api: Option<Api>,
     /// A reference to the earlier types, by name
     pub enums: Vec<String>,
     /// A reference to the earlier types, by name
@@ -286,12 +288,12 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
     fn parse(mut self, filter: &Filter, require_feature: bool) -> Registry {
         self.consume_start_element("registry");
 
-        let mut enums = Vec::new();
-        let mut cmds = Vec::new();
+        let mut enums = BTreeMap::new();
+        let mut cmds = BTreeMap::new();
         let mut features = Vec::new();
-        let mut extensions = Vec::new();
+        let mut extensions = BTreeMap::new();
         let mut aliases = BTreeMap::new();
-        let mut groups: BTreeMap<String, Group> = BTreeMap::new();
+        let mut groups = BTreeMap::new();
 
         while let Some(event) = self.next() {
             match event {
@@ -299,19 +301,28 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 ParseEvent::Text(_) => (),
                 ParseEvent::Start(ref name, _) if name == "comment" => self.skip_to_end("comment"),
                 ParseEvent::Start(ref name, _) if name == "types" => self.skip_to_end("types"),
-
-                // add group namespace
+                // ignore groups, they are deprecated in favour of `<enums group="">` elements which
+                // are above all easier to parse like that.
                 ParseEvent::Start(ref name, _) if name == "groups" => {
-                    groups.extend(self.consume_groups(filter.api));
+                    self.skip_to_end("groups");
                 },
 
                 // add enum namespace
                 ParseEvent::Start(ref name, ref attributes) if name == "enums" => {
-                    enums.extend(self.consume_enums(filter.api));
+                    let enms = self.consume_enums(filter.api);
+                    enums.extend(enms.iter().cloned());
                     let enums_group = get_attribute(attributes, "group");
                     let enums_type = get_attribute(attributes, "type");
-                    if let Some(group) = enums_group.and_then(|name| groups.get_mut(&name)) {
-                        group.enums_type = enums_type;
+                    if let Some(group) = enums_group {
+                        let prev = groups.insert(
+                            group.clone(),
+                            Group {
+                                ident: group.clone(),
+                                enums_type,
+                                enums: vec![],
+                            },
+                        );
+                        assert!(prev.is_none(), "Group {group} is already inserted");
                     }
                 },
 
@@ -330,7 +341,8 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 ParseEvent::Start(ref name, _) if name == "extensions" => loop {
                     match self.next().unwrap() {
                         ParseEvent::Start(ref name, ref attributes) if name == "extension" => {
-                            extensions.push(Extension::convert(&mut self, attributes));
+                            let ext = Extension::convert(&mut self, attributes);
+                            extensions.insert(ext.name.clone(), ext);
                         },
                         ParseEvent::End(ref name) if name == "extensions" => break,
                         event => panic!("Unexpected message {:?}", event),
@@ -362,11 +374,13 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     if remove.profile == filter.profile {
                         for enm in &remove.enums {
                             debug!("Removing {enm}");
-                            desired_enums.remove(enm);
+                            let s = desired_enums.remove(enm);
+                            assert!(s, "{enm} not known");
                         }
                         for cmd in &remove.commands {
                             debug!("Removing {cmd}");
-                            desired_cmds.remove(cmd);
+                            let s = desired_cmds.remove(cmd);
+                            assert!(s, "{cmd} not known");
                         }
                     }
                 }
@@ -380,39 +394,46 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
             panic!("Did not find version {} in the registry", filter.version);
         }
 
-        for extension in &extensions {
-            if filter.extensions.contains(&extension.name) {
-                if !extension.supported.contains(&filter.api) {
-                    panic!(
-                        "Requested {}, which doesn't support the {} API",
-                        extension.name, filter.api
-                    );
-                }
-                for require in &extension.requires {
+        for extension_name in &filter.extensions {
+            let extension = extensions.get(extension_name).unwrap_or_else(|| {
+                panic!(
+                    "Requested extension `{}` not defined for the {} API",
+                    extension_name, filter.api
+                )
+            });
+            if !extension.supported.contains(&filter.api) {
+                panic!(
+                    "Requested extension `{}` doesn't support the {} API",
+                    extension.name, filter.api
+                );
+            }
+            for require in &extension.requires {
+                // TODO: Just like enums, this filter should be moved to the point where the element
+                // is parsed so that we can skip it directly, filter.api is already known at that
+                // point.  The same is true for <feature> and <extension>, though the latter allows
+                // us to provide a more useful message to the user.
+                if require.api.is_none_or(|a| a == filter.api) {
                     desired_enums.extend(require.enums.iter().cloned());
                     desired_cmds.extend(require.commands.iter().cloned());
                 }
             }
         }
 
-        let is_desired_enum = |e: &Enum| {
-            desired_enums.contains(&("GL_".to_string() + &e.ident))
-                || desired_enums.contains(&("WGL_".to_string() + &e.ident))
-                || desired_enums.contains(&("GLX_".to_string() + &e.ident))
-                || desired_enums.contains(&("EGL_".to_string() + &e.ident))
-        };
-
-        let is_desired_cmd = |c: &Cmd| {
-            desired_cmds.contains(&("gl".to_string() + &c.proto.ident))
-                || desired_cmds.contains(&("wgl".to_string() + &c.proto.ident))
-                || desired_cmds.contains(&("glX".to_string() + &c.proto.ident))
-                || desired_cmds.contains(&("egl".to_string() + &c.proto.ident))
-        };
+        let enums = desired_enums
+            .iter()
+            .map(|n| enums.remove(n).expect(n))
+            .collect();
+        let cmds = desired_cmds
+            .iter()
+            .map(|n| cmds.remove(n).expect(n))
+            .collect();
 
         Registry {
             api: filter.api,
-            enums: enums.into_iter().filter(is_desired_enum).collect(),
-            cmds: cmds.into_iter().filter(is_desired_cmd).collect(),
+            enums,
+            // : enums.into_iter().filter(is_desired_enum).collect(),
+            cmds,
+            // : cmds.into_iter().filter(is_desired_cmd).collect(),
             aliases: if filter.fallbacks == Fallbacks::None {
                 BTreeMap::new()
             } else {
@@ -513,7 +534,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         }
     }
 
-    fn consume_enums(&mut self, api: Api) -> Vec<Enum> {
+    fn consume_enums(&mut self, api: Api) -> Vec<(String, Enum)> {
         let mut enums = Vec::new();
         loop {
             match self.next().unwrap() {
@@ -523,7 +544,12 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
 
                 // add enum definition
                 ParseEvent::Start(ref name, ref attributes) if name == "enum" => {
-                    enums.push(self.consume_enum(api, attributes));
+                    let enum_api = get_attribute(attributes, "api")
+                        .map(|api| api_from_str(&api).unwrap().unwrap());
+                    let enm = self.consume_enum(api, attributes);
+                    if enum_api.is_none_or(|a| a == api) {
+                        enums.push(enm);
+                    }
                 },
 
                 // finished building the namespace
@@ -535,56 +561,24 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         enums
     }
 
-    fn consume_enum(&mut self, api: Api, attributes: &[Attribute]) -> Enum {
-        let ident = trim_enum_prefix(&get_attribute(attributes, "name").unwrap(), api).to_string();
+    fn consume_enum(&mut self, api: Api, attributes: &[Attribute]) -> (String, Enum) {
+        let name = get_attribute(attributes, "name").unwrap();
+        let ident = trim_enum_prefix(&name, api).to_string();
         let value = get_attribute(attributes, "value").unwrap();
         let alias = get_attribute(attributes, "alias");
         let ty = get_attribute(attributes, "type");
         self.consume_end_element("enum");
 
-        match api {
-            Api::Egl => make_egl_enum(ident, ty, value, alias),
-            _ => make_enum(ident, ty, value, alias),
-        }
+        (
+            name,
+            match api {
+                Api::Egl => make_egl_enum(ident, ty, value, alias),
+                _ => make_enum(ident, ty, value, alias),
+            },
+        )
     }
 
-    fn consume_groups(&mut self, api: Api) -> BTreeMap<String, Group> {
-        let mut groups = BTreeMap::new();
-        loop {
-            match self.next().unwrap() {
-                ParseEvent::Start(ref name, ref attributes) if name == "group" => {
-                    let ident = get_attribute(attributes, "name").unwrap();
-                    let group = Group {
-                        ident: ident.clone(),
-                        enums_type: None,
-                        enums: self.consume_group_enums(api),
-                    };
-                    groups.insert(ident, group);
-                },
-                ParseEvent::End(ref name) if name == "groups" => break,
-                event => panic!("Expected </groups>, found: {:?}", event),
-            }
-        }
-        groups
-    }
-
-    fn consume_group_enums(&mut self, api: Api) -> Vec<String> {
-        let mut enums = Vec::new();
-        loop {
-            match self.next().unwrap() {
-                ParseEvent::Start(ref name, ref attributes) if name == "enum" => {
-                    let enum_name = get_attribute(attributes, "name");
-                    enums.push(trim_enum_prefix(&enum_name.unwrap(), api));
-                    self.consume_end_element("enum");
-                },
-                ParseEvent::End(ref name) if name == "group" => break,
-                event => panic!("Expected </group>, found: {:?}", event),
-            }
-        }
-        enums
-    }
-
-    fn consume_cmds(&mut self, api: Api) -> (Vec<Cmd>, BTreeMap<String, Vec<String>>) {
+    fn consume_cmds(&mut self, api: Api) -> (Vec<(String, Cmd)>, BTreeMap<String, Vec<String>>) {
         let mut cmds = Vec::new();
         let mut aliases: BTreeMap<String, Vec<String>> = BTreeMap::new();
         loop {
@@ -592,13 +586,13 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 // add command definition
                 ParseEvent::Start(ref name, _) if name == "command" => {
                     let new = self.consume_cmd(api);
-                    if let Some(ref v) = new.alias {
+                    if let Some(ref v) = new.1.alias {
                         match aliases.entry(v.clone()) {
                             Entry::Occupied(mut ent) => {
-                                ent.get_mut().push(new.proto.ident.clone());
+                                ent.get_mut().push(new.1.proto.ident.clone());
                             },
                             Entry::Vacant(ent) => {
-                                ent.insert(vec![new.proto.ident.clone()]);
+                                ent.insert(vec![new.1.proto.ident.clone()]);
                             },
                         }
                     }
@@ -613,11 +607,12 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
         (cmds, aliases)
     }
 
-    fn consume_cmd(&mut self, api: Api) -> Cmd {
+    fn consume_cmd(&mut self, api: Api) -> (String, Cmd) {
         // consume command prototype
         self.consume_start_element("proto");
         let mut proto = self.consume_binding("proto", &[]);
-        proto.ident = trim_cmd_prefix(&proto.ident, api).to_string();
+        let name = std::mem::take(&mut proto.ident);
+        proto.ident = trim_cmd_prefix(&name, api).to_string();
 
         let mut params = Vec::new();
         let mut alias = None;
@@ -630,6 +625,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 },
                 ParseEvent::Start(ref name, ref attributes) if name == "alias" => {
                     alias = get_attribute(attributes, "name");
+                    // TODO: Use untrimmed names for aliases?
                     alias = alias.map(|t| trim_cmd_prefix(&t, api).to_string());
                     self.consume_end_element("alias");
                 },
@@ -649,13 +645,16 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
             }
         }
 
-        Cmd {
-            proto,
-            params,
-            alias,
-            vecequiv,
-            glx,
-        }
+        (
+            name,
+            Cmd {
+                proto,
+                params,
+                alias,
+                vecequiv,
+                glx,
+            },
+        )
     }
 
     fn consume_binding(&mut self, outside_tag: &str, attributes: &[Attribute]) -> Binding {
@@ -706,10 +705,15 @@ trait FromXml {
 }
 
 impl FromXml for Require {
-    fn convert<P: Parse>(parser: &mut P, _: &[Attribute]) -> Require {
+    fn convert<P: Parse>(parser: &mut P, a: &[Attribute]) -> Require {
         debug!("Doing a FromXml on Require");
+        let api = get_attribute(a, "api").map(|api| api_from_str(&api).unwrap().unwrap());
         let (enums, commands) = parser.consume_two("enum", "command", "require");
-        Require { enums, commands }
+        Require {
+            api,
+            enums,
+            commands,
+        }
     }
 }
 
@@ -999,7 +1003,7 @@ pub fn to_rust_ty<T: AsRef<str>>(ty: T) -> Cow<'static, str> {
         "const HGPUNV *" => "*const types::HGPUNV",
         "const LAYERPLANEDESCRIPTOR *" => "*const types::LAYERPLANEDESCRIPTOR",
         "const LPVOID *" => "*const types::LPVOID",
-        "const PIXELFORMATDESCRIPTOR *" => "*const types::IXELFORMATDESCRIPTOR",
+        "const PIXELFORMATDESCRIPTOR *" => "*const types::PIXELFORMATDESCRIPTOR",
         "const USHORT *" => "*const types::USHORT",
         // "const char *"              => "*const __gl_imports::raw::c_char",
         // "const int *"               => "*const __gl_imports::raw::c_int",
