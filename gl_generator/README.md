@@ -21,7 +21,7 @@ Add this to your `Cargo.toml`:
 
 ```toml
 [build-dependencies]
-gl_generator = "0.14.0"
+gl_generator = "0.14.1"
 ```
 
 Under the `[package]` section, add:

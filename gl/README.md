@@ -10,7 +10,7 @@ An OpenGL function pointer loader for the Rust Programming Language.
 
 ```toml
 [dependencies]
-gl = "0.14.0"
+gl = "0.14.1"
 ```
 
 ## Basic usage

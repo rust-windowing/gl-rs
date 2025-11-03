@@ -10,7 +10,7 @@ The Khronos XML API Registry, exposed as byte string constants.
 
 ```toml
 [build-dependencies]
-khronos_api = "3.1.0"
+khronos_api = "3.2.0"
 ```
 
 The following constants are provided:
