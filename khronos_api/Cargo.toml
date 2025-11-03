@@ -18,6 +18,7 @@ readme = "README.md"
 # exceed the maximum crate size if we didn't do this
 include = [
   "/README.md",
+  "/LICENSE",
   "/src/**/*",
   "/Cargo.toml",
   "/build.rs",
