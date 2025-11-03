@@ -7,16 +7,10 @@ authors = [
     "Arseny Kapoulkine",
 ]
 description = "Code generators for creating bindings to the Khronos OpenGL APIs."
-license = "Apache-2.0"
-documentation = "https://docs.rs/gl_generator"
-repository = "https://github.com/rust-windowing/gl-rs"
-readme = "README.md"
+license.workspace = true
+repository.workspace = true
 categories = ["api-bindings", "rendering::graphics-api"]
 keywords = ["gl", "egl", "opengl", "khronos"]
-
-[lib]
-name = "gl_generator"
-path = "lib.rs"
 
 [features]
 unstable_generator_utils = []

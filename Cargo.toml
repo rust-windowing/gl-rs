@@ -1,4 +1,5 @@
 [workspace]
+resolver = "3"
 members = [
     "gl",
     "gl_generator",
@@ -10,6 +11,10 @@ members = [
     "tests/test_with_extensions",
     "khronos_api",
 ]
+
+[workspace.package]
+license = "Apache-2.0"
+repository = "https://github.com/rust-windowing/gl-rs"
 
 [workspace.lints.clippy]
 uninlined_format_args = "deny"

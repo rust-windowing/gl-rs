@@ -7,11 +7,8 @@ authors = [
     "Arseny Kapoulkine",
 ]
 description = "OpenGL bindings"
-license = "Apache-2.0"
-build = "build.rs"
-documentation = "https://docs.rs/gl"
-repository = "https://github.com/rust-windowing/gl-rs"
-readme = "README.md"
+license.workspace = true
+repository.workspace = true
 categories = ["api-bindings", "rendering::graphics-api"]
 keywords = ["gl", "egl", "opengl", "khronos"]
 

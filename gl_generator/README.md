@@ -24,12 +24,6 @@ Add this to your `Cargo.toml`:
 gl_generator = "0.14.0"
 ```
 
-Under the `[package]` section, add:
-
-```toml
-build = "build.rs"
-```
-
 Create a `build.rs` to pull your specific version/API:
 
 ```rust

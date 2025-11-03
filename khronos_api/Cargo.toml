@@ -8,10 +8,8 @@ authors = [
   "Pierre Krieger <pierre.krieger1708@gmail.com>",
 ]
 description = "The Khronos XML API Registry, exposed as byte string constants."
-license = "Apache-2.0"
-documentation = "https://docs.rs/khronos_api"
-repository = "https://github.com/rust-windowing/gl-rs"
-readme = "README.md"
+license.workspace = true
+repository.workspace = true
 
 # Only include what we need here. The git submodules are quite large, and would
 # exceed the maximum crate size if we didn't do this
