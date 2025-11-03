@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use registry::Registry;
+use crate::registry::Registry;
 use std::io;
 
 #[allow(missing_copy_implementations)]

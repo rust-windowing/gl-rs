@@ -12,9 +12,11 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use registry::{Cmd, Enum, Registry};
+use crate::{
+    Api,
+    registry::{Cmd, Enum, Registry},
+};
 use std::io;
-use Api;
 
 pub mod debug_struct_gen;
 pub mod global_gen;
@@ -51,7 +53,8 @@ pub fn gen_enum_item<W>(enm: &Enum, types_prefix: &str, dest: &mut W) -> io::Res
 where
     W: io::Write,
 {
-    writeln!(dest,
+    writeln!(
+        dest,
         "#[allow(dead_code, non_upper_case_globals)] pub const {ident}: {types_prefix}{ty} = {value}{cast_suffix};",
         ident = enm.ident,
         types_prefix = if enm.ty == "&str" { "" } else { types_prefix },

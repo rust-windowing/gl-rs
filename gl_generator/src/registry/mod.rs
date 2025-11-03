@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate khronos_api;
-
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
@@ -21,7 +19,7 @@ use std::hash::{Hash, Hasher};
 use std::io;
 use std::ops::{Add, AddAssign};
 
-use Generator;
+use crate::Generator;
 
 mod parse;
 

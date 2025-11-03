@@ -13,8 +13,10 @@ members = [
 ]
 
 [workspace.package]
+edition = "2024"
 license = "Apache-2.0"
 repository = "https://github.com/rust-windowing/gl-rs"
+rust-version = "1.85"
 
 [workspace.lints.clippy]
 uninlined_format_args = "deny"

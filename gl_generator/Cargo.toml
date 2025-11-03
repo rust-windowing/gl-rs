@@ -7,8 +7,10 @@ authors = [
     "Arseny Kapoulkine",
 ]
 description = "Code generators for creating bindings to the Khronos OpenGL APIs."
+edition.workspace = true
 license.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 categories = ["api-bindings", "rendering::graphics-api"]
 keywords = ["gl", "egl", "opengl", "khronos"]
 

@@ -27,8 +27,6 @@ gl_generator = "0.14.0"
 Create a `build.rs` to pull your specific version/API:
 
 ```rust
-extern crate gl_generator;
-
 use gl_generator::{Api, Fallbacks, GlobalGenerator, Profile, Registry};
 use std::env;
 use std::fs::File;

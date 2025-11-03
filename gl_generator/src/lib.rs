@@ -20,8 +20,6 @@
 //! In `build.rs`:
 //!
 //! ```no_run
-//! extern crate gl_generator;
-//!
 //! use gl_generator::{Api, Fallbacks, GlobalGenerator, Profile, Registry};
 //! use std::env;
 //! use std::fs::File;
@@ -60,10 +58,6 @@
 //! - `NativeWindowType`
 //!
 
-#[macro_use]
-extern crate log;
-extern crate xml;
-
 #[cfg(feature = "unstable_generator_utils")]
 pub mod generators;
 #[cfg(not(feature = "unstable_generator_utils"))]
@@ -71,11 +65,11 @@ mod generators;
 
 mod registry;
 
+pub use generators::Generator;
 pub use generators::debug_struct_gen::DebugStructGenerator;
 pub use generators::global_gen::GlobalGenerator;
 pub use generators::static_gen::StaticGenerator;
 pub use generators::static_struct_gen::StaticStructGenerator;
 pub use generators::struct_gen::StructGenerator;
-pub use generators::Generator;
 
 pub use registry::*;

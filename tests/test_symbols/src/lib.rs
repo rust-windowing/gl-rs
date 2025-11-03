@@ -45,7 +45,7 @@ fn test_fallback_works() {
         match name {
             "glGenFramebuffers" => std::ptr::null::<raw::c_void>(),
             "glGenFramebuffersEXT" => 42 as *const raw::c_void,
-            name => panic!("test tried to load {} unexpectedly!", name),
+            name => panic!("test tried to load {name} unexpectedly!"),
         }
     }
 

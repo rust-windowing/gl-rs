@@ -7,8 +7,10 @@ authors = [
     "Arseny Kapoulkine",
 ]
 description = "OpenGL bindings"
+edition.workspace = true
 license.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 categories = ["api-bindings", "rendering::graphics-api"]
 keywords = ["gl", "egl", "opengl", "khronos"]
 

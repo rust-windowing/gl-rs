@@ -8,8 +8,10 @@ authors = [
   "Pierre Krieger <pierre.krieger1708@gmail.com>",
 ]
 description = "The Khronos XML API Registry, exposed as byte string constants."
+edition.workspace = true
 license.workspace = true
 repository.workspace = true
+rust-version.workspace = true
 
 # Only include what we need here. The git submodules are quite large, and would
 # exceed the maximum crate size if we didn't do this

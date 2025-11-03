@@ -12,18 +12,19 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-extern crate khronos_api;
-
+use log::{debug, warn};
 use std::borrow::Cow;
 use std::collections::btree_map::Entry;
 use std::collections::{BTreeMap, BTreeSet};
 use std::io;
+use xml::EventReader as XmlEventReader;
 use xml::attribute::OwnedAttribute;
 use xml::reader::XmlEvent;
-use xml::EventReader as XmlEventReader;
 
-use registry::{Binding, Cmd, Enum, GlxOpcode, Group, Registry};
-use {Api, Fallbacks, Profile};
+use crate::{
+    registry::{Binding, Cmd, Enum, GlxOpcode, Group, Registry},
+    {Api, Fallbacks, Profile},
+};
 
 pub fn from_xml<R: io::Read>(src: R, filter: &Filter, require_feature: bool) -> Registry {
     XmlEventReader::new(src)
@@ -153,13 +154,13 @@ fn make_enum(ident: String, ty: Option<String>, value: String, alias: Option<Str
 
                 (Cow::Owned(ty), value, true)
             } else {
-                panic!("Unexpected value format: {}", value)
+                panic!("Unexpected value format: {value}")
             }
         } else {
             let ty = match ty {
                 Some(ref ty) if ty == "u" => "GLuint",
                 Some(ref ty) if ty == "ull" => "GLuint64",
-                Some(ty) => panic!("Unhandled enum type: {}", ty),
+                Some(ty) => panic!("Unhandled enum type: {ty}"),
                 None if value.starts_with("\"") => "&str",
                 None if ident == "TRUE" || ident == "FALSE" => "GLboolean",
                 None => "GLenum",
@@ -189,17 +190,17 @@ fn make_egl_enum(ident: String, ty: Option<String>, value: String, alias: Option
 
                 (Cow::Owned(ty), value, true)
             } else {
-                panic!("Unexpected value format: {}", value)
+                panic!("Unexpected value format: {value}")
             }
         } else {
             match value.chars().next() {
                 Some('-') | Some('0'..='9') => (),
-                _ => panic!("Unexpected value format: {}", value),
+                _ => panic!("Unexpected value format: {value}"),
             }
 
             let ty = match ty {
                 Some(ref ty) if ty == "ull" => "EGLuint64KHR",
-                Some(ty) => panic!("Unhandled enum type: {}", ty),
+                Some(ty) => panic!("Unhandled enum type: {ty}"),
                 None if value.starts_with('-') => "EGLint",
                 None if ident == "TRUE" || ident == "FALSE" => "EGLBoolean",
                 None => "EGLenum",
@@ -333,7 +334,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                             extensions.push(Extension::convert(&mut self, attributes));
                         },
                         ParseEvent::End(ref name) if name == "extensions" => break,
-                        event => panic!("Unexpected message {:?}", event),
+                        event => panic!("Unexpected message {event:?}"),
                     }
                 },
 
@@ -341,7 +342,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 ParseEvent::End(ref name) if name == "registry" => break,
 
                 // error handling
-                event => panic!("Expected </registry>, found: {:?}", event),
+                event => panic!("Expected </registry>, found: {event:?}"),
             }
         }
 
@@ -425,7 +426,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
     fn consume_characters(&mut self) -> String {
         match self.next().unwrap() {
             ParseEvent::Text(ch) => ch,
-            event => panic!("Expected characters, found: {:?}", event),
+            event => panic!("Expected characters, found: {event:?}"),
         }
     }
 
@@ -435,17 +436,17 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 if expected_name == name {
                     attributes
                 } else {
-                    panic!("Expected <{}>, found: <{}>", expected_name, name)
+                    panic!("Expected <{expected_name}>, found: <{name}>")
                 }
             },
-            event => panic!("Expected <{}>, found: {:?}", expected_name, event),
+            event => panic!("Expected <{expected_name}>, found: {event:?}"),
         }
     }
 
     fn consume_end_element(&mut self, expected_name: &str) {
         match self.next().unwrap() {
             ParseEvent::End(ref name) if expected_name == name => (),
-            event => panic!("Expected </{}>, found: {:?}", expected_name, event),
+            event => panic!("Expected </{expected_name}>, found: {event:?}"),
         }
     }
 
@@ -505,10 +506,10 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     } else if end == name {
                         return (ones, twos);
                     } else {
-                        panic!("Unexpected end element {:?}", name);
+                        panic!("Unexpected end element {name:?}");
                     }
                 },
-                event => panic!("Unexpected message {:?}", event),
+                event => panic!("Unexpected message {event:?}"),
             }
         }
     }
@@ -529,7 +530,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 // finished building the namespace
                 ParseEvent::End(ref name) if name == "enums" => break,
                 // error handling
-                event => panic!("Expected </enums>, found: {:?}", event),
+                event => panic!("Expected </enums>, found: {event:?}"),
             }
         }
         enums
@@ -562,7 +563,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     groups.insert(ident, group);
                 },
                 ParseEvent::End(ref name) if name == "groups" => break,
-                event => panic!("Expected </groups>, found: {:?}", event),
+                event => panic!("Expected </groups>, found: {event:?}"),
             }
         }
         groups
@@ -578,7 +579,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     self.consume_end_element("enum");
                 },
                 ParseEvent::End(ref name) if name == "group" => break,
-                event => panic!("Expected </group>, found: {:?}", event),
+                event => panic!("Expected </group>, found: {event:?}"),
             }
         }
         enums
@@ -607,7 +608,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 // finished building the namespace
                 ParseEvent::End(ref name) if name == "commands" => break,
                 // error handling
-                event => panic!("Expected </commands>, found: {:?}", event),
+                event => panic!("Expected </commands>, found: {event:?}"),
             }
         }
         (cmds, aliases)
@@ -645,7 +646,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     self.consume_end_element("glx");
                 },
                 ParseEvent::End(ref name) if name == "command" => break,
-                event => panic!("Expected </command>, found: {:?}", event),
+                event => panic!("Expected </command>, found: {event:?}"),
             }
         }
 
@@ -667,7 +668,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                 ParseEvent::Start(ref name, _) if name == "ptype" => (),
                 ParseEvent::End(ref name) if name == "ptype" => (),
                 ParseEvent::Start(ref name, _) if name == "name" => break,
-                event => panic!("Expected binding, found: {:?}", event),
+                event => panic!("Expected binding, found: {event:?}"),
             }
         }
 
@@ -680,7 +681,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
             match self.next().unwrap() {
                 ParseEvent::Text(text) => ty.push_str(&text),
                 ParseEvent::End(ref name) if name == outside_tag => break,
-                event => panic!("Expected binding, found: {:?}", event),
+                event => panic!("Expected binding, found: {event:?}"),
             }
         }
 
@@ -758,7 +759,7 @@ impl FromXml for Extension {
             .unwrap()
             .split('|')
             .filter_map(|api| {
-                api_from_str(api).unwrap_or_else(|()| panic!("unsupported API `{}`", api))
+                api_from_str(api).unwrap_or_else(|()| panic!("unsupported API `{api}`"))
             })
             .collect::<Vec<_>>();
         let mut require = Vec::new();
@@ -768,7 +769,7 @@ impl FromXml for Extension {
                     require.push(FromXml::convert(parser, attributes));
                 },
                 ParseEvent::End(ref name) if name == "extension" => break,
-                event => panic!("Unexpected message {:?}", event),
+                event => panic!("Unexpected message {event:?}"),
             }
         }
 
@@ -1096,7 +1097,7 @@ pub fn to_rust_ty<T: AsRef<str>>(ty: T) -> Cow<'static, str> {
 #[cfg(test)]
 mod tests {
     mod underscore_numeric_prefix {
-        use registry::parse;
+        use crate::registry::parse;
 
         #[test]
         fn test_numeric_prefix() {
@@ -1113,7 +1114,7 @@ mod tests {
     }
 
     mod underscore_keyword {
-        use registry::parse;
+        use crate::registry::parse;
 
         #[test]
         fn test_keyword() {
@@ -1129,7 +1130,7 @@ mod tests {
         }
     }
     mod make_enum {
-        use registry::parse;
+        use crate::registry::parse;
 
         #[test]
         fn test_cast_0() {
@@ -1225,7 +1226,7 @@ mod tests {
     }
 
     mod make_egl_enum {
-        use registry::parse;
+        use crate::registry::parse;
 
         #[test]
         fn test_cast_egl() {
@@ -1301,7 +1302,7 @@ mod tests {
             use xml::namespace::Namespace;
             use xml::reader::XmlEvent;
 
-            use registry::parse::{Attribute, ParseEvent};
+            use crate::registry::parse::{Attribute, ParseEvent};
 
             #[test]
             fn test_start_event() {

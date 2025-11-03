@@ -2,6 +2,8 @@
 name = "test_unstable_api"
 version = "0.0.0"
 publish = false
+edition.workspace = true
+rust-version.workspace = true
 
 [build-dependencies.gl_generator]
 path = "../../gl_generator"
