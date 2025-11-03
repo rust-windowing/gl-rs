@@ -1,7 +1,9 @@
-# khronos_api
+# `khronos_api`
 
-[![Version](https://img.shields.io/crates/v/khronos_api.svg)](https://crates.io/crates/khronos_api)
-[![License](https://img.shields.io/crates/l/khronos_api.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE)
+[![CI](https://github.com/rust-windowing/gl-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/rust-windowing/gl-rs/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/crates/v/khronos_api.svg?logo=rust)](https://crates.io/crates/khronos_api)
+[![Docs](https://img.shields.io/docsrs/khronos_api.svg?logo=docsdotrs)](https://docs.rs/khronos_api)
+[![License](https://img.shields.io/crates/l/khronos_api.svg)](./LICENSE)
 [![Downloads](https://img.shields.io/crates/d/khronos_api.svg)](https://crates.io/crates/khronos_api)
 
 The Khronos XML API Registry, exposed as byte string constants.

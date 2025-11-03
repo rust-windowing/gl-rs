@@ -1,7 +1,9 @@
-# gl_generator
+# `gl_generator`
 
-[![Version](https://img.shields.io/crates/v/gl_generator.svg)](https://crates.io/crates/gl_generator)
-[![License](https://img.shields.io/crates/l/gl_generator.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE)
+[![CI](https://github.com/rust-windowing/gl-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/rust-windowing/gl-rs/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/crates/v/gl_generator.svg?logo=rust)](https://crates.io/crates/gl_generator)
+[![Docs](https://img.shields.io/docsrs/gl_generator.svg?logo=docsdotrs)](https://docs.rs/gl_generator)
+[![License](https://img.shields.io/crates/l/gl_generator.svg)](./LICENSE)
 [![Downloads](https://img.shields.io/crates/d/gl_generator.svg)](https://crates.io/crates/gl_generator)
 
 Code generators for creating bindings to the Khronos OpenGL APIs.
@@ -71,8 +73,7 @@ The `build.rs` file will generate all the OpenGL functions in a file named,
 
 ### Global generator
 
-The global generator is the one used by default by the `gl` crate. See the 
-[README](https://github.com/brendanzab/gl-rs/tree/master/gl) for more details.
+The global generator is the one used by default by the [`gl` crate](https://crates.io/crates/gl).
 
 ### Struct generator
 

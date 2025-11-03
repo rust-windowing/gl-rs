@@ -24,7 +24,8 @@ pub mod struct_gen;
 
 /// Trait for a bindings generator.
 ///
-/// See https://github.com/brendanzab/gl-rs/tree/master/gl_generator#generator-types
+// TODO: Inline README into the library documentation
+/// See <https://crates.io/crates/gl_generator#generator-types>
 pub trait Generator {
     /// Builds the GL bindings.
     fn write<W>(&self, registry: &Registry, dest: &mut W) -> io::Result<()>

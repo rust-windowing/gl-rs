@@ -1,7 +1,9 @@
-# gl-rs
+# `gl`
 
-[![Version](https://img.shields.io/crates/v/gl.svg)](https://crates.io/crates/gl)
-[![License](https://img.shields.io/crates/l/gl.svg)](https://github.com/brendanzab/gl-rs/blob/master/LICENSE)
+[![CI](https://github.com/rust-windowing/gl-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/rust-windowing/gl-rs/actions/workflows/ci.yml)
+[![Version](https://img.shields.io/crates/v/gl.svg?logo=rust)](https://crates.io/crates/gl)
+[![Docs](https://img.shields.io/docsrs/gl.svg?logo=docsdotrs)](https://docs.rs/gl)
+[![License](https://img.shields.io/crates/l/gl.svg)](./LICENSE)
 [![Downloads](https://img.shields.io/crates/d/gl.svg)](https://crates.io/crates/gl)
 
 An OpenGL function pointer loader for the Rust Programming Language.

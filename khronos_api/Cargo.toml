@@ -10,8 +10,7 @@ authors = [
 description = "The Khronos XML API Registry, exposed as byte string constants."
 license = "Apache-2.0"
 documentation = "https://docs.rs/khronos_api"
-homepage = "https://github.com/brendanzab/gl-rs/"
-repository = "https://github.com/brendanzab/gl-rs/"
+repository = "https://github.com/rust-windowing/gl-rs"
 readme = "README.md"
 
 # Only include what we need here. The git submodules are quite large, and would
