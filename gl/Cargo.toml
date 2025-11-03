@@ -19,7 +19,7 @@ keywords = ["gl", "egl", "opengl", "khronos"]
 gl_generator = { version = "0.14.0", path = "../gl_generator" }
 
 [dev-dependencies]
-glutin = "0.24"
+glutin = "0.32"
 
 [lints]
 workspace = true
