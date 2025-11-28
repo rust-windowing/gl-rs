@@ -1,6 +1,6 @@
 [package]
 name = "gl"
-version = "0.14.0"
+version = "0.14.1"
 authors = [
     "Brendan Zabarauskas <bjzaba@yahoo.com.au>",
     "Corey Richardson",
@@ -16,7 +16,7 @@ categories = ["api-bindings", "rendering::graphics-api"]
 keywords = ["gl", "egl", "opengl", "khronos"]
 
 [build-dependencies]
-gl_generator = { version = "0.14.0", path = "../gl_generator" }
+gl_generator = { version = "0.14.1", path = "../gl_generator" }
 
 [dev-dependencies]
 glutin = "0.24"
