@@ -132,8 +132,8 @@ where
         writeln!(dest,
             "#[allow(non_snake_case, unused_variables, dead_code)] #[inline]
             pub unsafe fn {name}({params}) -> {return_suffix} {{ \
-                __gl_imports::mem::transmute::<_, extern \"system\" fn({typed_params}) -> {return_suffix}>\
-                    (storage::{name}.f)({idents}) \
+                unsafe {{ __gl_imports::mem::transmute::<_, extern \"system\" fn({typed_params}) -> {return_suffix}>\
+                    (storage::{name}.f)({idents}) }} \
             }}",
             name = cmd.proto.ident,
             params = super::gen_parameters(cmd, true, true).join(", "),
