@@ -250,13 +250,13 @@ where
 
         writeln!(dest,
                       "#[allow(non_snake_case, unused_variables, dead_code)]
-            #[inline] pub unsafe fn {name}(&self, {params}) -> {return_suffix} {{ \
+            #[inline] pub unsafe fn {name}(&self, {params}) -> {return_suffix} {{ unsafe {{ \
                 {println}
                 let r = __gl_imports::mem::transmute::<_, extern \"system\" fn({typed_params}) -> {return_suffix}>\
                     (self.{name}.f)({idents});
                 {print_err}
                 r
-            }}",
+            }} }}",
                       name = cmd.proto.ident,
                       params = super::gen_parameters(cmd, true, true).join(", "),
                       typed_params = typed_params.join(", "),
