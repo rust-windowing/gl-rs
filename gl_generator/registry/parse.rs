@@ -488,7 +488,7 @@ trait Parse: Sized + Iterator<Item = ParseEvent> {
                     } else if two == n {
                         twos.push(FromXml::convert(self, attributes));
                     } else {
-                        panic!("Unexpected element: <{:?} {:?}>", n, &attributes);
+                        panic!("Unexpected element: <{:?} {:?}>", n, attributes);
                     }
                 },
                 ParseEvent::End(ref name) => {
