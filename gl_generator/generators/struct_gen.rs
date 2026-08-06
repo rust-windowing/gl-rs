@@ -103,6 +103,7 @@ where
 
         impl FnPtr {{
             /// Creates a `FnPtr` from a load attempt.
+            #[inline(never)]
             fn new(ptr: *const __gl_imports::raw::c_void) -> FnPtr {{
                 if ptr.is_null() {{
                     FnPtr {{
