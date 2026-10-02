@@ -44,9 +44,9 @@ where
         dest,
         r#"
         mod __gl_imports {{
-            pub use std::mem;
-            pub use std::marker::Send;
-            pub use std::os::raw;
+            pub use core::mem;
+            pub use core::marker::Send;
+            pub use core::ffi as raw;
         }}
     "#
     )

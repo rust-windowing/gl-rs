@@ -28,4 +28,6 @@
     clippy::upper_case_acronyms,
 )]
 
+extern crate core;
+
 include!(concat!(env!("OUT_DIR"), "/test_no_warnings.rs"));

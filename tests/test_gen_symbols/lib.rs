@@ -19,6 +19,8 @@
     clippy::upper_case_acronyms
 )]
 
+extern crate core;
+
 use std::os::raw;
 
 include!(concat!(env!("OUT_DIR"), "/test_gen_symbols.rs"));

@@ -78,6 +78,7 @@
     clippy::too_many_arguments,
     clippy::unused_unit
 )]
+#![no_std]
 
 include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 

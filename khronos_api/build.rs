@@ -60,7 +60,7 @@ fn main() {
                     // using this environment variable, not at runtime of this build script using
                     // current_dir() or canonicalization.  These will differ on at least Bazel
                     // when/where the build script is containerized.
-                    r#"&*include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), "/{}")),"#,
+                    r#"&*include_bytes!(concat!(env!("CARGO_MANIFEST_DIR"), r"/{}")),"#,
                     ext_path.to_str().unwrap()
                 )
                 .unwrap();

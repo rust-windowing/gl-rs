@@ -53,6 +53,8 @@ fn main() {
 Then use it like this:
 
 ```rust
+extern crate core;  // or #![no_std] for no_std support
+
 mod gl {
     include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
 }
