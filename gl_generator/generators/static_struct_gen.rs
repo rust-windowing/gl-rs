@@ -147,7 +147,7 @@ where
         #[allow(non_snake_case)]
         #[allow(unused_variables)]
         #[allow(dead_code)]
-        extern \"system\" {{"
+        unsafe extern \"system\" {{"
     )?;
 
     for cmd in &registry.cmds {
