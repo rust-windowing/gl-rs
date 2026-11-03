@@ -122,7 +122,7 @@ where
             #[allow(dead_code)]
             #[inline]
             pub unsafe fn {name}(&self, {typed_params}) -> {return_suffix} {{
-                {name}({idents})
+                unsafe {{ {name}({idents}) }}
             }}",
             name = cmd.proto.ident,
             typed_params = super::gen_parameters(cmd, true, true).join(", "),
@@ -147,7 +147,7 @@ where
         #[allow(non_snake_case)]
         #[allow(unused_variables)]
         #[allow(dead_code)]
-        extern \"system\" {{"
+        unsafe extern \"system\" {{"
     )?;
 
     for cmd in &registry.cmds {
